@@ -63,7 +63,7 @@ Organizations:
                 Rule: "OR('Org2MSP.admin')"
         AnchorPeers:
             - Host: peer0.org2.example.com
-              Port: 7051
+              Port: 9051
 
     - &Browser
         Name: BrowserMSP
@@ -81,7 +81,7 @@ Organizations:
                 Rule: "OR('BrowserMSP.admin')"
         AnchorPeers:
             - Host: peer0.browser.example.com
-              Port: 8051
+              Port: 11051
 
 Capabilities:
     Channel: &ChannelCapabilities
