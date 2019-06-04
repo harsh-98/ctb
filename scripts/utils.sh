@@ -31,7 +31,7 @@ setOrdererGlobals() {
 setGlobals() {
   PEER=$1
   ORG=$2
-  if [ $ORG -eq "" ]; then
+  if [ $ORG == "org1" ]; then
     CORE_PEER_LOCALMSPID="Org1MSP"
     CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG1_CA
     CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
@@ -40,7 +40,7 @@ setGlobals() {
     else
       CORE_PEER_ADDRESS=peer1.org1.example.com:8051
     fi
-  elif [ $ORG -eq 2 ]; then
+  elif [ $ORG == "org2" ]; then
     CORE_PEER_LOCALMSPID="Org2MSP"
     CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
     CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
@@ -50,7 +50,7 @@ setGlobals() {
       CORE_PEER_ADDRESS=peer1.org2.example.com:10051
     fi
 
-  elif [ $ORG -eq 3 ]; then
+  elif [ $ORG == "browser" ]; then
     CORE_PEER_LOCALMSPID="BrowserMSP"
     CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG3_CA
     CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/browser.example.com/users/Admin@browser.example.com/msp
