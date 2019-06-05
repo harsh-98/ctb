@@ -9,7 +9,7 @@
 ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
 PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
 PEER0_ORG2_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
-PEER0_ORG3_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/browser.example.com/peers/peer0.browser.example.com/tls/ca.crt
+PEER0_BROWSER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/browser.example.com/peers/peer0.browser.example.com/tls/ca.crt
 
 # verify the result of the end-to-end test
 verifyResult() {
@@ -52,7 +52,7 @@ setGlobals() {
 
   elif [ $ORG == "browser" ]; then
     CORE_PEER_LOCALMSPID="BrowserMSP"
-    CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG3_CA
+    CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_BROWSER_CA
     CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/browser.example.com/users/Admin@browser.example.com/msp
     if [ $PEER -eq 0 ]; then
       CORE_PEER_ADDRESS=peer0.browser.example.com:11051
@@ -139,12 +139,12 @@ instantiateChaincode() {
   # the "-o" option
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode instantiate -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v ${VERSION} -c '{"Args":["init","a","100","b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
+    peer chaincode instantiate -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v ${VERSION} -c '{"Args":[]}' -P "OR ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
     res=$?
     set +x
   else
     set -x
-    peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v 1.0 -c '{"Args":["init","a","100","b","200"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
+    peer chaincode instantiate -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -l ${LANGUAGE} -v 1.0 -c '{"Args":[]}' -P "OR ('Org1MSP.peer','Org2MSP.peer')" >&log.txt
     res=$?
     set +x
   fi
@@ -172,8 +172,8 @@ upgradeChaincode() {
 chaincodeQuery() {
   PEER=$1
   ORG=$2
+  DOMAIN=$3
   setGlobals $PEER $ORG
-  EXPECTED_RESULT=$3
   echo "===================== Querying on peer${PEER}.${ORG} on channel '$CHANNEL_NAME'... ===================== "
   local rc=1
   local starttime=$(date +%s)
@@ -186,16 +186,9 @@ chaincodeQuery() {
     sleep $DELAY
     echo "Attempting to Query peer${PEER}.${ORG} ...$(($(date +%s) - starttime)) secs"
     set -x
-    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}' >&log.txt
+    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["queryCertificate","'$DOMAIN'"]}' >&log.txt
     res=$?
     set +x
-    test $res -eq 0 && VALUE=$(cat log.txt | awk '/Query Result/ {print $NF}')
-    test "$VALUE" = "$EXPECTED_RESULT" && let rc=0
-    # removed the string "Query Result" from peer chaincode query command
-    # result. as a result, have to support both options until the change
-    # is merged.
-    test $rc -ne 0 && VALUE=$(cat log.txt | egrep '^[0-9]+$')
-    test "$VALUE" = "$EXPECTED_RESULT" && let rc=0
   done
   echo
   cat log.txt
@@ -278,11 +271,13 @@ parsePeerConnectionParameters() {
   PEERS=""
   while [ "$#" -gt 0 ]; do
     setGlobals $1 $2
-    PEER="peer$1.org$2"
+    PEER="peer$1.$2"
     PEERS="$PEERS $PEER"
     PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
+    ORG=$(echo $2 | tr '[:lower:]' '[:upper:]')
     if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "true" ]; then
-      TLSINFO=$(eval echo "--tlsRootCertFiles \$PEER$1_ORG$2_CA")
+      TLSINFO=$(echo "--tlsRootCertFiles \$PEER$1_$ORG _CA" | sed "s/ _CA/_CA/g")
+      TLSINFO=$(eval echo $TLSINFO)
       PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
     fi
     # shift by two to get the next pair of peer/org parameters
@@ -303,14 +298,16 @@ chaincodeInvoke() {
   # while 'peer chaincode' command can get the orderer endpoint from the
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
+  NEWCERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/domain.crt)
+  CACERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"Args":["invoke","a","b","10"]}' >&log.txt
+    peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"Args":["addCertificate","'$NEWCERT'","'$CACERT'",""]}' >&log.txt
     res=$?
     set +x
   else
     set -x
-    peer chaincode invoke -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"Args":["invoke","a","b","10"]}' >&log.txt
+    peer chaincode invoke -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"addCertificate\",\"$NEWCERT\",\"$CACERT\",\"\"]}" >&log.txt
     res=$?
     set +x
   fi
