@@ -1,5 +1,4 @@
 log.txt
-scripts/certs
 scripts/test.sh
 crypto-config
 /channel-artifacts/*.tx
