@@ -192,14 +192,14 @@ chaincodeQuery() {
   done
   echo
   cat log.txt
-  if test $rc -eq 0; then
-    echo "===================== Query successful on peer${PEER}.${ORG} on channel '$CHANNEL_NAME' ===================== "
-  else
-    echo "!!!!!!!!!!!!!!! Query result on peer${PEER}.${ORG} is INVALID !!!!!!!!!!!!!!!!"
-    echo "================== ERROR !!! FAILED to execute End-2-End Scenario =================="
-    echo
-    exit 1
-  fi
+  # if test $rc -eq 0; then
+  #   echo "===================== Query successful on peer${PEER}.${ORG} on channel '$CHANNEL_NAME' ===================== "
+  # else
+  #   echo "!!!!!!!!!!!!!!! Query result on peer${PEER}.${ORG} is INVALID !!!!!!!!!!!!!!!!"
+  #   echo "================== ERROR !!! FAILED to execute End-2-End Scenario =================="
+  #   echo
+  #   exit 1
+  # fi
 }
 
 # fetchChannelConfig <channel_id> <output_json>
