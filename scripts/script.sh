@@ -92,14 +92,25 @@ instantiateChaincode 0 org1
 sleep 4
 # Invoke chaincode on peer0.org1 and peer0.org2
 echo "Sending invoke transaction on peer0.org1 peer0.org2..."
+
+# adding the first certificate for domain.com
 chaincodeInvoke 0 org1 0 org2
-
-## Install chaincode on peer1.org2
-
-
-
-# Query chaincode
+sleep 2
 chaincodeQuery 1 browser domain.com
+
+
+# adding a new certificate for domain.com which the current one is active
+newChaincodeInvoke 0 org1 0 org2
+sleep 2
+chaincodeQuery 1 browser domain.com
+
+# revoking the current certificate
+revokeCertificate 0 org1 0 org2
+sleep 2
+chaincodeQuery 1 browser domain.com
+
+# getting certificate history
+queryHistory 1 browser domain.com
 
 echo
 echo "========= All GOOD, BYFN execution completed =========== "

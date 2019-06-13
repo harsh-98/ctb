@@ -218,7 +218,7 @@ func (s *SmartContract) revokeCertificate(APIstub shim.ChaincodeStubInterface, a
 	// extract the public key of the CA
 	caPubKey := caCert.PublicKey.(*rsa.PublicKey)
 	// verify the signature (3rd argument) using the PK of CA
-	if !verifySignatureOnMessage(caSigOnCert, caCertString, caPubKey) {
+	if !verifySignatureOnMessage(caSigOnCert, certString, caPubKey) {
 		return shim.Error("failed to verify the signature!")
 	}
 

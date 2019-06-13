@@ -1,5 +1,13 @@
+
 log.txt
 scripts/test.sh
+sample-command
+
+sign/vendor
+sign/Gopkg.*
+
+
+
 crypto-config
 /channel-artifacts/*.tx
 /channel-artifacts/*.block

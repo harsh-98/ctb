@@ -190,16 +190,29 @@ chaincodeQuery() {
     res=$?
     set +x
   done
-  echo
-  cat log.txt
-  # if test $rc -eq 0; then
-  #   echo "===================== Query successful on peer${PEER}.${ORG} on channel '$CHANNEL_NAME' ===================== "
-  # else
-  #   echo "!!!!!!!!!!!!!!! Query result on peer${PEER}.${ORG} is INVALID !!!!!!!!!!!!!!!!"
-  #   echo "================== ERROR !!! FAILED to execute End-2-End Scenario =================="
-  #   echo
-  #   exit 1
-  # fi
+}
+
+queryHistory() {
+  PEER=$1
+  ORG=$2
+  DOMAIN=$3
+  setGlobals $PEER $ORG
+  echo "===================== Querying on peer${PEER}.${ORG} on channel '$CHANNEL_NAME'... ===================== "
+  local rc=1
+  local starttime=$(date +%s)
+
+  # continue to poll
+  # we either get a successful response, or reach TIMEOUT
+  while
+    test "$(($(date +%s) - starttime))" -lt "$TIMEOUT" -a $rc -ne 0
+  do
+    sleep $DELAY
+    echo "Attempting to Query peer${PEER}.${ORG} ...$(($(date +%s) - starttime)) secs"
+    set -x
+    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["queryCertificateHistory","'$DOMAIN'"]}' >&log.txt
+    res=$?
+    set +x
+  done
 }
 
 # fetchChannelConfig <channel_id> <output_json>
@@ -298,16 +311,73 @@ chaincodeInvoke() {
   # while 'peer chaincode' command can get the orderer endpoint from the
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
-  NEWCERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/domain.crt)
+  NEWCERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/domain.crt)\\n"
   CACERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
-    peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c '{"Args":["addCertificate","'$NEWCERT'","'$CACERT'",""]}' >&log.txt
+    peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"addCertificate\",\"$NEWCERT\",\"$CACERT\",\"\"]}" >&log.txt
     res=$?
     set +x
   else
     set -x
     peer chaincode invoke -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"addCertificate\",\"$NEWCERT\",\"$CACERT\",\"\"]}" >&log.txt
+    res=$?
+    set +x
+  fi
+  cat log.txt
+  verifyResult $res "Invoke execution on $PEERS failed "
+  echo "===================== Invoke transaction successful on $PEERS on channel '$CHANNEL_NAME' ===================== "
+  echo
+}
+
+newChaincodeInvoke() {
+  parsePeerConnectionParameters $@
+  res=$?
+  verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
+
+  # while 'peer chaincode' command can get the orderer endpoint from the
+  # peer (if join was successful), let's supply it directly as we know
+  # it using the "-o" option
+  NEWCERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/d2.crt)\\n"
+  CACERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)
+  ./scripts/sign scripts/certs/fixed-domain.key scripts/certs/d2.crt
+  SIGNCERT=$(cat sig)
+  if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
+    set -x
+    peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"addCertificate\",\"$NEWCERT\",\"$CACERT\",\"$SIGNCERT\"]}" >&log.txt
+    res=$?
+    set +x
+  else
+    set -x
+    peer chaincode invoke -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"addCertificate\",\"$NEWCERT\",\"$CACERT\",\"$SIGNCERT\"]}" >&log.txt
+    res=$?
+    set +x
+  fi
+  cat log.txt
+  verifyResult $res "Invoke execution on $PEERS failed "
+  echo "===================== Invoke transaction successful on $PEERS on channel '$CHANNEL_NAME' ===================== "
+  echo
+}
+revokeCertificate() {
+  parsePeerConnectionParameters $@
+  res=$?
+  verifyResult $res "Invoke transaction failed on channel '$CHANNEL_NAME' due to uneven number of peer and org parameters "
+
+  # while 'peer chaincode' command can get the orderer endpoint from the
+  # peer (if join was successful), let's supply it directly as we know
+  # it using the "-o" option
+  CERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/d2.crt)\\n"
+  CACERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)"
+  ./scripts/sign scripts/certs/unencrypted-ca.key scripts/certs/d2.crt
+  SIGNCERT=$(cat sig)
+  if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
+    set -x
+    peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"revokeCertificate\",\"$CERT\",\"$CACERT\",\"$SIGNCERT\"]}" >&log.txt
+    res=$?
+    set +x
+  else
+    set -x
+    peer chaincode invoke -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"revokeCertificate\",\"$CERT\",\"$CACERT\",\"$SIGNCERT\"]}" >&log.txt
     res=$?
     set +x
   fi
