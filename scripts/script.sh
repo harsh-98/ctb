@@ -1,5 +1,16 @@
 #!/bin/bash
-
+# export FABRIC_CFG_PATH=${PWD}
+# export VERBOSE=false
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
+echo $FABRIC_CFG_PATH
 echo
 echo " ____    _____      _      ____    _____ "
 echo "/ ___|  |_   _|    / \    |  _ \  |_   _|"
@@ -52,10 +63,12 @@ createChannel() {
 
 joinChannel () {
 	for org in org1 org2 browser; do
-	    for peer in 0 1; do
+	    for peer in 0; do
+	    # for peer in 0 1; do
 		joinChannelWithRetry $peer $org
 		echo "===================== peer${peer}.${org} joined channel '$CHANNEL_NAME' ===================== "
 		sleep $DELAY
+		# exit 0
 		echo
 	    done
 	done
@@ -63,7 +76,6 @@ joinChannel () {
 ## Create channel
 echo "Creating channel..."
 createChannel
-
 ## Join all the peers to the channel
 echo "Having all peers join the channel..."
 joinChannel
@@ -80,9 +92,9 @@ echo "Installing chaincode"
 installChaincode 0 org1
 installChaincode 0 org2
 installChaincode 0 browser
-installChaincode 1 org1
-installChaincode 1 org2
-installChaincode 1 browser
+# installChaincode 1 org1
+# installChaincode 1 org2
+# installChaincode 1 browser
 
 
 # Instantiate chaincode on peer0.org2
@@ -99,15 +111,15 @@ sleep 2
 chaincodeQuery 1 browser domain.com
 
 
-# adding a new certificate for domain.com which the current one is active
-newChaincodeInvoke 0 org1 0 org2
-sleep 2
-chaincodeQuery 1 browser domain.com
+# adding a new certificate for domain.com while the current one is active
+# newChaincodeInvoke 0 org1 0 org2
+# sleep 2
+# chaincodeQuery 1 browser domain.com
 
-# revoking the current certificate
-revokeCertificate 0 org1 0 org2
-sleep 2
-chaincodeQuery 1 browser domain.com
+# # revoking the current certificate
+# revokeCertificate 0 org1 0 org2
+# sleep 2
+# chaincodeQuery 1 browser domain.com
 
 # getting certificate history
 queryHistory 1 browser domain.com

@@ -27,16 +27,16 @@ PeerOrgs:
     Domain: org1.example.com
     EnableNodeOUs: true
     Template:
-      Count: 2
+      Count: 1
 
   - Name: Org2
     Domain: org2.example.com
     EnableNodeOUs: true
     Template:
-      Count: 2
+      Count: 1
 
   - Name: browser
     Domain: browser.example.com
     EnableNodeOUs: true
     Template:
-      Count: 2
+      Count: 1

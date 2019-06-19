@@ -1,0 +1,132 @@
+version: '2'
+
+# volumes:
+#   ca.org1.example.com:
+#   ca.org2.example.com:
+#   ca.browser.example.com:
+#   couchdb.peer0.org1.example.com:
+#   couchdb.peer0.org2.example.com:
+#   couchdb.peer0.browser.example.com:
+networks:
+  byfn:
+
+services:
+  ca.org1.example.com:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.org1.example.com
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA1_PRIVATE_KEY
+    ports:
+      - "7054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ../crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca.org1.example.com
+    networks:
+      - byfn
+  ca.org2.example.com:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.org2.example.com
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org2.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA2_PRIVATE_KEY
+    ports:
+      - "8054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ../crypto-config/peerOrganizations/org2.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca.org2.example.com
+    networks:
+      - byfn
+  ca.browser.example.com:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.browser.example.com
+      - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.browser.example.com-cert.pem
+      - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA3_PRIVATE_KEY
+    ports:
+      - "9054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ../crypto-config/peerOrganizations/browser.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca.browser.example.com
+    networks:
+      - byfn
+
+
+  couchdb.peer0.org1.example.com:
+    container_name: couchdb.peer0.org1.example.com
+    image: hyperledger/fabric-couchdb
+    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    ports:
+      - 5984:5984
+    networks:
+      - byfn
+  # couchdb.peer1.org1.example.com:
+  #   container_name: couchdb.peer1.org1.example.com
+  #   image: hyperledger/fabric-couchdb
+  #   # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+  #   # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+  #   environment:
+  #     - COUCHDB_USER=
+  #     - COUCHDB_PASSWORD=
+  #   ports:
+  #     - 5985:5985
+  #   networks:
+  #     - byfn
+  couchdb.peer0.org2.example.com:
+    container_name: couchdb.peer0.org2.example.com
+    image: hyperledger/fabric-couchdb
+    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    ports:
+      - 6984:5984
+    networks:
+      - byfn
+  # couchdb.peer1.org2.example.com:
+  #   container_name: couchdb.peer1.org2.example.com
+  #   image: hyperledger/fabric-couchdb
+  #   # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+  #   # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+  #   environment:
+  #     - COUCHDB_USER=
+  #     - COUCHDB_PASSWORD=
+  #   ports:
+  #     - 6985:6985
+  #   networks:
+  #     - byfn
+  couchdb.peer0.browser.example.com:
+    container_name: couchdb.peer0.browser.example.com
+    image: hyperledger/fabric-couchdb
+    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    ports:
+      - 7984:5984
+    networks:
+      - byfn
+  # couchdb.peer1.browser.example.com:
+  #   container_name: couchdb.peer1.browser.example.com
+  #   image: hyperledger/fabric-couchdb
+  #   # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+  #   # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+  #   environment:
+  #     - COUCHDB_USER=
+  #     - COUCHDB_PASSWORD=
+  #   ports:
+  #     - 7985:7985
+  #   networks:
+  #     - byfn

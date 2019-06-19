@@ -152,7 +152,7 @@ function networkUp() {
   checkPrereqs
   # generate artifacts if they don't exist
   if [ ! -d "crypto-config" ]; then
-    generateCerts
+    # generateCerts
     # replacePrivateKey
     generateChannelArtifacts
   fi
@@ -164,6 +164,8 @@ function networkUp() {
       IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_RAFT2 -f $COMPOSE_FILE_COUCH up -d 2>&1
       docker ps -a
     else
+      IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-ca.yaml -f $COMPOSE_FILE_COUCH up -d 2>&1
+      sleep 5
       IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
       docker ps -a
     fi
@@ -175,6 +177,8 @@ function networkUp() {
       IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_RAFT2 up -d 2>&1
       docker ps -a
     else
+      IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-ca.yaml up -d 2>&1
+      sleep 5
       IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE up -d 2>&1
       docker ps -a
     fi
@@ -195,7 +199,8 @@ function networkUp() {
     echo "Sleeping 15s to allow $CONSENSUS_TYPE cluster to complete booting"
     sleep 14
   fi
-
+}
+function testcases(){
   # now run the end to end script
   docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
   if [ $? -ne 0 ]; then
@@ -285,6 +290,7 @@ function networkDown() {
   # stop kafka and zookeeper containers in case we're running with kafka consensus-type
   # docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH -f $COMPOSE_FILE_KAFKA -f $COMPOSE_FILE_RAFT2 down --volumes --remove-orphans
   docker-compose -f $COMPOSE_FILE down --volumes --remove-orphans
+  docker-compose -f docker-compose-ca.yaml down --volumes --remove-orphans
 
   # Don't remove the generated artifacts -- note, the ledgers are always removed
   if [ "$MODE" != "restart" ]; then
@@ -296,7 +302,7 @@ function networkDown() {
     #Cleanup images
     removeUnwantedImages
     # remove orderer block and other channel configuration transactions and certs
-    rm -rf channel-artifacts/*.block channel-artifacts/*.tx crypto-config ./org3-artifacts/crypto-config/ channel-artifacts/org3.json
+    rm -rf channel-artifacts/*.block channel-artifacts/*.tx ./org3-artifacts/crypto-config/ channel-artifacts/org3.json
     # remove the docker-compose yaml file that was customized to the example
     rm -f docker-compose-e2e.yaml
   fi
@@ -316,19 +322,27 @@ function replacePrivateKey() {
   fi
 
   # Copy the template to the file that will be modified to add the private key
-  cp docker-compose-e2e-template.yaml docker-compose-e2e.yaml
+  cp docker-compose-ca-sample.yaml docker-compose-ca.yaml
 
   # The next steps will replace the template's contents with the
   # actual values of the private key file names for the two CAs.
   CURRENT_DIR=$PWD
+
   cd crypto-config/peerOrganizations/org1.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
+  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-ca.yaml
+
   cd crypto-config/peerOrganizations/org2.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-e2e.yaml
+  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-ca.yaml
+
+  cd crypto-config/peerOrganizations/browser.example.com/ca/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+  sed $OPTS "s/CA3_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-ca.yaml
+
   # If MacOSX, remove the temporary backup of the docker-compose file
   if [ "$ARCH" == "Darwin" ]; then
     rm docker-compose-e2e.yamlt
@@ -364,9 +378,9 @@ function generateCerts() {
   echo "##### Generate certificates using cryptogen tool #########"
   echo "##########################################################"
 
-  if [ -d "crypto-config" ]; then
-    rm -Rf crypto-config
-  fi
+  # if [ -d "crypto-config" ]; then
+  #   # rm -Rf crypto-config
+  # fi
   set -x
   cryptogen generate --config=./crypto-config.yaml
   res=$?
@@ -546,6 +560,8 @@ elif [ "$MODE" == "generate" ]; then
   EXPMODE="Generating certs and genesis block"
 elif [ "$MODE" == "upgrade" ]; then
   EXPMODE="Upgrading the network"
+elif [ "$MODE" == "test" ]; then
+  EXPMODE="running test case"
 else
   printHelp
   exit 1
@@ -605,14 +621,16 @@ if [ "${MODE}" == "up" ]; then
 elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
-  generateCerts
-  # replacePrivateKey
+  # generateCerts
+  replacePrivateKey
   generateChannelArtifacts
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown
   networkUp
 elif [ "${MODE}" == "upgrade" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   upgradeNetwork
+elif [ "${MODE}" == "test" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
+  testcases
 else
   printHelp
   exit 1
