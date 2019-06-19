@@ -1,0 +1,131 @@
+{
+    "name": "basic-network",
+    "version": "1.0.0",
+    "client": {
+        "organization": "Org1",
+        "connection": {
+            "timeout": {
+                "peer": {
+                    "endorser": "300"
+                },
+                "orderer": "300"
+            }
+        }
+    },
+    "channels": {
+        "mychannel": {
+            "orderers": [
+                "orderer.example.com"
+            ],
+            "peers": {
+                "peer0.org1.example.com": {},
+                "peer0.org2.example.com": {},
+                "peer0.browser.example.com": {}
+            }
+        }
+    },
+    "organizations": {
+        "Org1": {
+            "mspid": "Org1MSP",
+            "peers": [
+                "peer0.org1.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org1.example.com"
+            ]
+        },
+        "Org2": {
+            "mspid": "Org2MSP",
+            "peers": [
+                "peer0.org2.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.org2.example.com"
+            ]
+        },
+        "Browser": {
+            "mspid": "BrowserMSP",
+            "peers": [
+                "peer0.browser.example.com"
+            ],
+            "certificateAuthorities": [
+                "ca.browser.example.com"
+            ]
+        }
+    },
+    "orderers": {
+        "orderer.example.com": {
+            "url": "grpcs://localhost:7050",
+			"grpcOptions": {
+				"ssl-target-name-override": "orderer.example.com"
+			},
+			"tlsCACerts": {
+				"path": "../crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+			}
+        }
+    },
+    "peers": {
+        "peer0.org1.example.com": {
+            "url": "grpcs://localhost:7051",
+			"grpcOptions": {
+				"ssl-target-name-override": "peer0.org1.example.com",
+				"request-timeout": 120001
+			},
+			"tlsCACerts": {
+				"path": "../crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp/tlscacerts/tlsca.org1.example.com-cert.pem"
+			}
+        },
+        "peer0.org2.example.com": {
+            "url": "grpcs://localhost:9051",
+			"grpcOptions": {
+				"ssl-target-name-override": "peer0.org2.example.com",
+				"request-timeout": 120001
+			},
+			"tlsCACerts": {
+				"path": "../crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/msp/tlscacerts/tlsca.org2.example.com-cert.pem"
+			}
+        },
+        "peer0.browser.example.com": {
+            "url": "grpcs://localhost:11051",
+			"grpcOptions": {
+				"ssl-target-name-override": "peer0.browser.example.com",
+				"request-timeout": 120001
+			},
+			"tlsCACerts": {
+				"path": "../crypto-config/peerOrganizations/browser.example.com/peers/peer0.browser.example.com/msp/tlscacerts/tlsca.browser.example.com-cert.pem"
+			}
+        }
+    },
+    "certificateAuthorities": {
+        "ca.org1.example.com": {
+            "url": "http://localhost:7054",
+            "caName": "ca.org1.example.com",
+			"httpOptions": {
+				"verify": false
+			},
+			"tlsCACerts": {
+				"path": "../crypto-config/peerOrganizations/org1.example.com/ca/ca.org1.example.com-cert.pem"
+			}
+        },
+        "ca.org2.example.com": {
+            "url": "http://localhost:8054",
+            "caName": "ca.org2.example.com",
+			"httpOptions": {
+				"verify": false
+			},
+			"tlsCACerts": {
+				"path": "../crypto-config/peerOrganizations/org2.example.com/ca/ca.org2.example.com-cert.pem"
+			}
+        },
+        "ca.browser.example.com": {
+            "url": "http://localhost:9054",
+            "caName": "ca.browser.example.com",
+			"httpOptions": {
+				"verify": false
+			},
+			"tlsCACerts": {
+				"path": "../crypto-config/peerOrganizations/browser.example.com/ca/ca.browser.example.com-cert.pem"
+			}
+        }
+    }
+}
