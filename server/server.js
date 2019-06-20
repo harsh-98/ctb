@@ -1,32 +1,19 @@
-'use strict';
+const express = require('express');
+const app = express();
+import {main} from './query';
+// Logging
+const morgan = require('morgan');
+const logger = require('./logger');
 
-const tls = require('tls');
-const fs = require('fs');
-const port = 8000;
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan('short', { stream: logger.stream }));
 
-var args = process.argv.slice(2);
+// Load up the routes
+console.log(main);
+app.get('/', main);
+app.post('/', main);
 
-const options = {
-    key: fs.readFileSync(args[0]),
-    cert: fs.readFileSync(args[1]),
-    ca: fs.readFileSync(args[2])
-};
-
-var server = tls.createServer(options, (socket) => {
-    socket.write(options.cert);
-    socket.setEncoding('utf8');
-    socket.pipe(socket);
-})
-
-    .on('connection', function (c) {
-        console.log('insecure connection');
-    })
-
-    .on('secureConnection', function (c) {
-        // c.authorized will be true if the client cert presented validates with our CA
-        console.log('secure connection');
-    })
-
-    .listen(port, function () {
-        console.log('server listening on port ' + port + '\n');
-    });
+// Start the API
+app.listen(8000);
+logger.log('info', `api running on port 8000`);

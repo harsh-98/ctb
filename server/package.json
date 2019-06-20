@@ -4,13 +4,22 @@
     "description": "Hyperledger Fabric ca-blockchain Sample Application",
     "main": "ca-blockchain.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "babel-node": "babel-node",
+        "start": "nodemon --exec npm run babel-node -- ./server.js"
     },
     "dependencies": {
+        "dotenv": "^8.0.0",
+        "express": "^4.17.1",
         "fabric-ca-client": "~1.4.0",
         "fabric-client": "~1.4.0",
+        "fabric-network": "~1.4.0",
         "grpc": "^1.6.0",
-        "fabric-network": "~1.4.0"
+        "morgan": "^1.9.1",
+        "winston": "^3.2.1"
+    },
+    "devDependencies": {
+        "babel-preset-es2015": "^6.24.1"
     },
     "author": "harsh jain",
     "license": "Apache-2.0",
