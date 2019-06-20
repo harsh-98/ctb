@@ -116,7 +116,7 @@ cd test_app/client
 node client.js ../../scripts/certs/ca.crt
 ```
 
-As the certificate is no lonerger valid. The response of client app shows that certificate is revoked.
+As the certificate is no longer valid, the response of client app shows that certificate is revoked.
 
 ```
 SSL PKI authenication status:  Success
