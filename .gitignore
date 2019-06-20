@@ -2,7 +2,7 @@
 log.txt
 scripts/test.sh
 sample-command
-
+**/node_modules
 sign/vendor
 sign/Gopkg.*
 
