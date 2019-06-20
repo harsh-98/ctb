@@ -45,7 +45,7 @@ async function main() {
             chainId: 'mychannel',
             txId: tx_id
         };
-    } else if (revoke === 'revoke') {
+    } else if (revoke === 'revokeCertificate') {
           var request = {
         //targets: let default to the peer assigned to the client
             chaincodeId: 'mycc',
@@ -80,9 +80,8 @@ async function main() {
         const contract = network.getContract(request.txId);
 
         // Submit the specified transaction.
-        // addCertificate transaction - requires 2 args, ex: ('addCertificate', '')
-        // addCertificate transaction - requires 3 args, ex: ('addCertificate', '')
-        // revokeCertificate transaction - requires 3 args , ex: ('revokeCertificate', '')
+        // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
+        // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR10', 'Dave')
         await contract.submitTransaction(request.fcn, ...request.args);
         console.log('Transaction has been submitted');
 

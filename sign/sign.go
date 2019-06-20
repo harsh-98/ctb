@@ -29,10 +29,11 @@ func verify(sigString string, rsaPubKey rsa.PublicKey, message []byte) {
 
 func main() {
 
-	privateKeyFile := os.Args[1]
+	pass := os.Args[1]
+	privateKeyFile := os.Args[2]
 	pemString, err1 := ioutil.ReadFile(privateKeyFile)
 
-	certFile := os.Args[2]
+	certFile := os.Args[3]
 	certPemString, err2 := ioutil.ReadFile(certFile)
 
 	if err1 != nil && err2 != nil {
@@ -40,10 +41,14 @@ func main() {
 		fmt.Println(err2)
 	} else {
 		block, _ := pem.Decode([]byte(pemString))
-		// password:="1234567890"
-		// b, _:=x509.DecryptPEMBlock(block, []byte(password))
-		// key, _ := x509.ParsePKCS1PrivateKey(b)
 		key, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
+
+		if pass == "pass" {
+			password:="1234567890"
+			b, _:=x509.DecryptPEMBlock(block, []byte(password))
+			key, _ = x509.ParsePKCS1PrivateKey(b)
+		}
+
 		rng := rand.Reader
 		message := []byte(certPemString)
 		hashed := sha256.Sum256(message)

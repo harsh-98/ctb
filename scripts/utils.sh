@@ -367,6 +367,7 @@ revokeCertificate() {
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
   CERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/d2.crt)\\n"
+  # CERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/d2.crt)\\n"
   CACERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)"
   ./scripts/sign scripts/certs/unencrypted-ca.key scripts/certs/d2.crt
   SIGNCERT=$(cat sig)
