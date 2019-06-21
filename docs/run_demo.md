@@ -1,15 +1,14 @@
 # Server/client HLCTB demo
-This document provides a hands-on experience on testing HLCTB network for different X.509 certificate verfication scenarios. These scenarios are:
+This document provides a hands-on tutorial on testing HLCTB network for different X.509 certificate verfication scenarios. These scenarios are:
 
 - while an active certificate is on HLCTB network
 - a new certificate has been added to HLCTB network with consent of previous certificate
-- the certificate for demo has been revoked.
+- the certificate for domain has been revoked.
 
-This demo involves communication between 5 parties:
+This demo involves communication between 4 parties:
 - HLCTB network
 - CA authority
-- query Server
-- domain server
+- domain server(includes `query Server`)
 - client (browser)
 
 ## Creating the network
@@ -33,14 +32,14 @@ While an active certificate is on HLCTB network:
 ##### Adding certificate for domain.com
 ```
 cd server
-node newinvoke.js tester certs/domain.crt certs/ca.crt
+node newinvoke.js tester ../scripts/certs/domain.crt ../scripts/certs/ca.crt
 ```
 
 ##### Starting domain.com server
 On a different terminal, from the root directory of this project:
 ```
 cd test_app
-node server.js ../scripts/certs/d2.key ../scripts/certs/d2.crt ../scripts/certs/ca.crt
+node server.js ../scripts/certs/domain.key ../scripts/certs/domain.crt ../scripts/certs/ca.crt
 ```
 
 ##### Starting query server
@@ -51,6 +50,7 @@ npm start
 ```
 
 ##### Connecting to domain.com server
+On a different terminal, from root directory:
 ```
 cd test_app/client
 node client.js ../../scripts/certs/ca.crt
@@ -70,7 +70,7 @@ A new certificate has been added to HLCTB network with consent of previous certi
 Issuing a new certificate with the consent of the domain, from the root directory of this project:
 ```
 cd server
-node newinvoke.js tester certs/d2.crt certs/ca.crt certs/sig-d2-by-domain
+node newinvoke.js tester ../scripts/certs/d2.crt ../scripts/certs/ca.crt ../scripts/certs/sig-d2-by-domain
 ```
 Here, the third argument is signature of d2.crt signed by private key of domain.crt pair.
 
@@ -80,7 +80,7 @@ cd test_app/client
 node client.js ../../scripts/certs/ca.crt
 ```
 
-If the response is similiar to below one, then the new certificate has been added. And Certificate for domain.com that we are using it client is on longer valid:
+If the response is similiar to below one, then the new certificate has been added. And Certificate for domain.com that we are using for domain server is on longer valid:
 ```
 SSL PKI authenication status:  Success
 invalid
@@ -107,9 +107,13 @@ Hence the updated certificate is present on the HLCTB network.
 
 
 ## Flow 3
-
 The certificate for demo has been revoked:
 
+##### Connect to domain server
+```
+cd server
+node newinvoke.js tester ../scripts/certs/d2.crt ../scripts/certs/ca.crt ../scripts/certs/sig-d2-by-ca  revoke
+```
 ##### Connect to domain server
 ```
 cd test_app/client

@@ -24,6 +24,6 @@ chaincode/main.go contains chaincode CTB described in above paper.
 I have modified [byfn](https://hyperledger-fabric.readthedocs.io/en/release-1.4/build_network.html) scripts and config files to incorporate CTB architecture.
 
 ## Demo
-This project has a test_app which contains a sample server/client application for testing HLCTB for different scenarios.
+This project contains a sample server/client application for testing different scenarios on HLCTB network. Code for sample application is available under `test_app` folder.
 
 For more information, refer [run_demo.md](docs/run_demo.md).
