@@ -72,7 +72,7 @@ services:
   #       - peer1.org1.example.com:/var/hyperledger/production
 
   #   ports:
-  #     - 8051:8051
+  #     - 8051:7051
 
   peer0.org2.example.com:
     container_name: peer0.org2.example.com
@@ -81,12 +81,12 @@ services:
       service: peer-base
     environment:
       - CORE_PEER_ID=peer0.org2.example.com
-      - CORE_PEER_ADDRESS=peer0.org2.example.com:9051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:9051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:9052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:9052
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:9051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:9051
+      - CORE_PEER_ADDRESS=peer0.org2.example.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.org2.example.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org2.example.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org2.example.com:7051
       # - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.org2.example.com:10051
       - CORE_PEER_LOCALMSPID=Org2MSP
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
@@ -99,7 +99,7 @@ services:
         - ../crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.org2.example.com:/var/hyperledger/production
     ports:
-      - 9051:9051
+      - 9051:7051
 
   # peer1.org2.example.com:
   #   container_name: peer1.org2.example.com
@@ -134,12 +134,12 @@ services:
       service: peer-base
     environment:
       - CORE_PEER_ID=peer0.browser.example.com
-      - CORE_PEER_ADDRESS=peer0.browser.example.com:11051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:11051
-      - CORE_PEER_CHAINCODEADDRESS=peer0.browser.example.com:11052
-      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:11052
-      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.browser.example.com:11051
-      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.browser.example.com:11051
+      - CORE_PEER_ADDRESS=peer0.browser.example.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.browser.example.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.browser.example.com:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.browser.example.com:7051
       # - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.browser.example.com:12051
       - CORE_PEER_LOCALMSPID=BrowserMSP
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
@@ -152,7 +152,7 @@ services:
         - ../crypto-config/peerOrganizations/browser.example.com/peers/peer0.browser.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.browser.example.com:/var/hyperledger/production
     ports:
-      - 11051:11051
+      - 11051:7051
 
   # peer1.browser.example.com:
   #   container_name: peer1.browser.example.com
