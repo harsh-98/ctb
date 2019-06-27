@@ -1,0 +1,25 @@
+version: '2'
+
+# volumes:
+#   ca.org1.example.com:
+#   ca.org2.example.com:
+#   ca.browser.example.com:
+#   couchdb.peer0.org1.example.com:
+#   couchdb.peer0.org2.example.com:
+#   couchdb.peer0.browser.example.com:
+networks:
+  byfn:
+
+
+services:
+  sql:
+    container_name: sql.example.com
+    image: mysql:5.7
+    tty: true
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=fabricexplorer
+    volumes:
+        - ./explorer/fabricexplorer.sql:/docker-entrypoint-initdb.d/fabricexplorer.sql
+    networks:
+      - byfn

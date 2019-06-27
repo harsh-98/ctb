@@ -1,0 +1,59 @@
+{
+    "GOPATH": "/opt/gopath",
+    "channel": "mychannel",
+    "enableTls": false,
+    "eventWaitTime": "30000",
+    "host": "explorer",
+    "keyValueStore": "/tmp/fabric-client-kvs",
+    "mysql": {
+        "database": "fabricexplorer",
+        "host": "sql.example.com",
+        "passwd": "root",
+        "port": "3306",
+        "username": "root"
+    },
+    "network-config": {
+        "org1": {
+            "admin": {
+                "cert": "/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts",
+                "key": "/first-network/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore"
+            },
+            "ca": "http://ca.org1.example.com:7054",
+            "mspid": "Org1MSP",
+            "name": "org1.example.com",
+            "peer0": {
+                "events": "grpcs://peer0.org1.example.com:7051",
+                "requests": "grpcs://peer0.org1.example.com:7051",
+                "server-hostname": "peer0.org1.example.com",
+                "tls_cacerts": "/first-network/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
+            }
+        },
+        "org2": {
+            "admin": {
+                "cert": "/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts",
+                "key": "/first-network/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore"
+            },
+            "ca": "http://ca.org2.example.com:7054",
+            "mspid": "Org2MSP",
+            "name": "org2.example.com",
+            "peer0": {
+                "events": "grpcs://peer0.org2.example.com:7051",
+                "requests": "grpcs://peer0.org2.example.com:7051",
+                "server-hostname": "peer0.org2.example.com",
+                "tls_cacerts": "/first-network/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt"
+            }
+        }
+    },
+    "org": [
+        "org1",
+        "org2"
+    ],
+    "peer": "peer0",
+    "port": "8080",
+    "users": [
+        {
+            "secret": "adminpw",
+            "username": "admin"
+        }
+    ]
+}

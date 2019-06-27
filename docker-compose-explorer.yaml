@@ -1,0 +1,30 @@
+version: '2'
+
+# volumes:
+#   ca.org1.example.com:
+#   ca.org2.example.com:
+#   ca.browser.example.com:
+#   couchdb.peer0.org1.example.com:
+#   couchdb.peer0.org2.example.com:
+#   couchdb.peer0.browser.example.com:
+networks:
+  byfn:
+
+
+services:
+
+  explorer:
+    container_name: explorer.example.com
+    image: yeasy/blockchain-explorer:0.1.0-preview
+    tty: true
+    stdin_open: true
+    command: /bin/bash -c -- "sleep 10;node main.js 2>&1"
+    volumes:
+      - ./explorer/config.json:/blockchain-explorer/config.json
+      - ./crypto-config:/blockchain-explorer/first-network/crypto-config
+    networks:
+      - byfn
+    # depends_on:
+    #   - sql
+    ports:
+      - "8080:8080"
