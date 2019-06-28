@@ -7,48 +7,41 @@
 const { FileSystemWallet, Gateway } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config()
 
 const ccpPath = path.resolve(__dirname, 'connect.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
-async function main() {
+async function main(req, res, next) {
     var args = process.argv.slice(2);
-    let username = args[0];
+    // let username = args[0];
+    let username = process.env.QUERYUSER;
 
-    var certPath = args[1];
-    var intermediateCertPath = args[2];
-    var sigFilePath = null;
-    var revoke = null;
-    if (args.length === 4) {
-        sigFilePath = args[3];
-    }
-    if (args.length === 5) {
-        sigFilePath = args[3];
-        revoke = args[4];
-        console.log(revoke);
-    }
-    var certString = fs.readFileSync(certPath).toString();
-    var intermediateCertString = fs.readFileSync(intermediateCertPath).toString();
-    var sigString = "";
-    if (sigFilePath !== null) {
-        sigString = fs.readFileSync(sigFilePath).toString();
-    }
+    // var certPath = args[1];
+    // var intermediateCertPath = args[2];
+    var sigString = req.body['sig_string'];
+    var revoke = req.body['revoke'];
+
+    // var certString = fs.readFileSync(certPath).toString();
+    let certString = req.body['cert_string'];
+    // var intermediateCertString = fs.readFileSync(intermediateCertPath).toString();
+    let intermediateCertString = req.body['intermed_cert'];
 
     let tx_id = "mycc";
-    if (revoke === null) {
+    if (revoke != "true") {
             var request = {
         //targets: let default to the peer assigned to the client
-            chaincodeId: 'mycc',
+            chaincodeId: tx_id,
             fcn: 'addCertificate',
             args: [certString, intermediateCertString, sigString],
             chainId: 'mychannel',
             txId: tx_id
         };
-    } else if (revoke === 'revokeCertificate') {
+    } else if (revoke === 'true') {
           var request = {
         //targets: let default to the peer assigned to the client
-            chaincodeId: 'mycc',
+            chaincodeId: tx_id,
             fcn: 'revokeCertificate',
             args: [certString, intermediateCertString, sigString],
             chainId: 'mychannel',
@@ -60,6 +53,7 @@ async function main() {
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
         console.log(`Wallet path: ${walletPath}`);
+        console.log(`${request}`);
 
         // Check to see if we've already enrolled the user.
         const userExists = await wallet.exists(username);
@@ -80,11 +74,11 @@ async function main() {
         const contract = network.getContract(request.txId);
 
         // Submit the specified transaction.
-        // createCar transaction - requires 5 argument, ex: ('createCar', 'CAR12', 'Honda', 'Accord', 'Black', 'Tom')
-        // changeCarOwner transaction - requires 2 args , ex: ('changeCarOwner', 'CAR10', 'Dave')
+        // addCertificate transaction - requires 2 args, ex: ('addCertificate', '')
+        // addCertificate transaction - requires 3 args, ex: ('addCertificate', '')
+        // revokeCertificate transaction - requires 3 args , ex: ('revokeCertificate', '')
         await contract.submitTransaction(request.fcn, ...request.args);
-        console.log('Transaction has been submitted');
-
+        res.status(200).json({"response": "Transaction has been submitted"});
         // Disconnect from the gateway.
         await gateway.disconnect();
 
@@ -94,4 +88,4 @@ async function main() {
     }
 }
 
-main();
+export default main;
