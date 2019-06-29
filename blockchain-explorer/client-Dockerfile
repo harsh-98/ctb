@@ -1,0 +1,11 @@
+FROM node:8.11.4
+MAINTAINER Harsh Jain <harsh-98.github.io>
+
+EXPOSE 3000
+
+RUN git clone --single-branch -b master https://github.com/hyperledger/blockchain-explorer ; cd /blockchain-explorer; git checkout 863278adb9d8c;  find -maxdepth 1 -type d ! -name client ! -name . -exec rm -rv {} \;
+
+WORKDIR /blockchain-explorer/client
+
+
+RUN npm install

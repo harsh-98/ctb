@@ -1,0 +1,40 @@
+version: '2'
+services:
+
+  server:
+    container_name: server.explorer.com
+    image: hlf-explorer-server:1.0
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./config.json:/blockchain-explorer/app/platform/fabric/config.json
+      - ./ctb.json:/blockchain-explorer/app/platform/fabric/connection-profile/ctb.json
+      - ./explorerconfig.json:/blockchain-explorer/app/explorerconfig.json
+      - ../server/wallet/admin:/blockchain-explorer/wallet/ctb/admin
+      - ./logs:/blockchain-explorer/logs
+      - ../crypto-config:/blockchain-explorer/crypto-config
+    command: /bin/bash start.sh
+    environment:
+      - DISCOVERY_AS_LOCALHOST=false
+    networks:
+      - outside
+    ports:
+      - "8080:8080"
+
+  client:
+    container_name: client.explorer.com
+    image: hlf-explorer-client:1.0
+    tty: true
+    stdin_open: true
+    command: npm start
+    volumes:
+      - ./client-package.json:/blockchain-explorer/client/package.json
+    networks:
+      - outside
+    ports:
+      - "3000:3000"
+
+networks:
+  outside:
+    external:
+      name: net_byfn

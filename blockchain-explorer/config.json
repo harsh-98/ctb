@@ -1,0 +1,10 @@
+{
+	"network-configs": {
+		"ctb": {
+			"name": "ctb",
+			"profile": "./connection-profile/ctb.json",
+			"enableAuthentication": false
+		}
+	},
+	"license": "Apache-2.0"
+}
