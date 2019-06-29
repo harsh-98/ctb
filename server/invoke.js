@@ -77,12 +77,18 @@ async function main(req, res, next) {
         // addCertificate transaction - requires 2 args, ex: ('addCertificate', '')
         // addCertificate transaction - requires 3 args, ex: ('addCertificate', '')
         // revokeCertificate transaction - requires 3 args , ex: ('revokeCertificate', '')
-        await contract.submitTransaction(request.fcn, ...request.args);
-        res.status(200).json({"response": "Transaction has been submitted"});
+        try {
+            await contract.submitTransaction(request.fcn, ...request.args);
+        } catch (error) {
+            // throw new Error(req.body['peer']);
+            res.status(200).json({"response": "Transaction failed"});
+        }
         // Disconnect from the gateway.
         await gateway.disconnect();
+        res.status(200).json({"response": "Transaction has been submitted"});
 
     } catch (error) {
+        res.status(200).json({"response": "Transaction failed"});
         console.error(`Failed to submit transaction: ${error}`);
         process.exit(1);
     }
