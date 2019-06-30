@@ -1,3 +1,9 @@
+SUCCESSCOUNT=0
+LOCK=0
+DOMAINCOUNT=100
+ISSUECOUNT=5
+
+
 create_ca(){
     echo "##########################################################"
     echo "Generating certificate for $CA"
@@ -30,8 +36,11 @@ issue_cert(){
     cp ../sample.ext $NAME.ext
     sed -i "s/domain.com/$DOMAIN/g" $NAME.ext
 
-    openssl x509 -req -in $NAME.csr -CA ../$CA/$CA.crt -CAkey ../$CA/$CA.key -CAcreateserial \
-    -out $NAME.crt -days 1825 -sha256 -extfile $NAME.ext
+    while [ ! -s "$NAME.crt" ]
+    do
+        openssl x509 -req -in $NAME.csr -CA ../$CA/$CA.crt -CAkey ../$CA/$CA.key -CAcreateserial \
+            -out $NAME.crt -days 1825 -sha256 -extfile $NAME.ext
+    done
 
     openssl rsa -in $NAME.key -out rsa-$NAME.key
     cd ..
@@ -65,7 +74,19 @@ push_cert() {
     fi
 
     echo "sig_string is $sig_string"
-    curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\"}"
+    local response=`curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\",\"peer\": \"$NEWDOMAIN\"}"`
+
+    while [ $LOCK == 1 ]
+    do
+    echo -n ""
+    done
+
+    LOCK=1
+    if [[ $response == *"submitted"* ]]; then
+        SUCCESSCOUNT=$(($SUCCESSCOUNT + 1))
+    fi
+    LOCK=0
+
     echo
 }
 
@@ -89,7 +110,18 @@ revoke_cert() {
 
     sig_string=`$CMDSTRING`
     echo "sig_string is $sig_string\n"
-    curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\",\"revoke\": \"true\"}"
+    local response=`curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\",\"revoke\": \"true\",\"peer\": \"$DOMAIN\"}"`
+
+    while [ $LOCK == 1 ]
+    do
+        echo -n ""
+    done
+    LOCK=1
+    if [[ $response == *"submitted"* ]]; then
+        SUCCESSCOUNT=$(($SUCCESSCOUNT + 1))
+    fi
+    LOCK=0
+
     echo
 }
 
@@ -97,23 +129,34 @@ clean() {
     rm -rf `ls -d */`
 }
 
-main(){
-    clean
-    CA=ca.or.example.com
-    create_ca $CA
-    for i in {1..1}
+test_domain() {
+    DOMAIN=iq$i.example.com
+    CA=$2
+    issue_cert $DOMAIN $CA
+    push_cert $DOMAIN $CA
+    for j in $(seq 2 $3)
         do
-            DOMAIN=tst$i.example.com
-            issue_cert $DOMAIN $CA
-            push_cert $DOMAIN $CA
+            issue_cert $DOMAIN $CA $j
+            push_cert $DOMAIN $CA $j
+        done
+    revoke_cert $DOMAIN $CA $3
 
-            for j in {2..2}
-                do
-                    issue_cert $DOMAIN $CA $j
-                    push_cert $DOMAIN $CA $j
-                done
+    if [ $i == $DOMAINCOUNT ]
+    then
+        echo "Success count is $SUCCESSCOUNT"
+        RES=$(($ISSUECOUNT+1))
+        echo "Request count is $(( $DOMAINCOUNT * $RES ))"
+    fi
+}
 
-            revoke_cert $DOMAIN $CA 2
+
+main() {
+    clean
+    CA=iq.example.com
+    create_ca $CA
+    for i in $(seq 1 $DOMAINCOUNT)
+        do
+            test_domain $i $CA $ISSUECOUNT  &
         done
 }
 
