@@ -5,9 +5,9 @@ sample-command
 **/node_modules
 sign/vendor
 sign/Gopkg.*
-
-
-
+server/access.log
+**/sig
+blockchain-explorer/logs/*
 crypto-config
 /channel-artifacts/*.tx
 /channel-artifacts/*.block

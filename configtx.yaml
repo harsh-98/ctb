@@ -119,10 +119,10 @@ Orderer: &OrdererDefaults
     Addresses:
         - orderer.example.com:7050
 
-    BatchTimeout: 2s
+    BatchTimeout: 4s
 
     BatchSize:
-        MaxMessageCount: 10
+        MaxMessageCount: 20
         AbsoluteMaxBytes: 99 MB
         PreferredMaxBytes: 512 KB
 
