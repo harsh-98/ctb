@@ -13,7 +13,7 @@ services:
       - ../server/wallet/admin:/blockchain-explorer/wallet/ctb/admin
       - ./logs:/blockchain-explorer/logs
       - ../crypto-config:/blockchain-explorer/crypto-config
-    command: /bin/bash start.sh
+    command: bash -c -- "sed -i 's/2>&1 &/2>\&1/g' start.sh ; ./start.sh"
     environment:
       - DISCOVERY_AS_LOCALHOST=false
     networks:
