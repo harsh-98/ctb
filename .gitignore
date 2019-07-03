@@ -8,6 +8,7 @@ sign/Gopkg.*
 server/access.log
 **/sig
 blockchain-explorer/logs/*
+docker-compose-ca.yaml
 crypto-config
 /channel-artifacts/*.tx
 /channel-artifacts/*.block
