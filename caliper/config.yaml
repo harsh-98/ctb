@@ -1,0 +1,44 @@
+---
+blockchain:
+  type: fabric
+  config: benchmark/simple/customNetworkConfig.json
+command:
+  start: ''
+  end: ''
+test:
+  name: test
+  description: Benchmark for test scenario
+  clients:
+    type: local
+    number: 1
+  rounds:
+  - label: retrive
+    txNumber:
+    - 100
+    rateControl:
+    - type: fixed-rate
+      opts:
+        tps: 10
+    callback: ctb/pushCert.js
+  - label: create
+    txNumber:
+    - 1000
+    - 300
+    arguments: {}
+    rateControl:
+    - type: fixed-rate
+      opts:
+        tps: 100
+    - type: fixed-rate
+      opts:
+        tps: 50
+    callback: ctb/query.js
+monitor:
+  type: docker
+  docker:
+    name:
+    - peer0.org1.example.com
+    - peer0.org2.example.com
+    - orderer.example.com
+    - peer0.browser.example.com
+  interval: 1

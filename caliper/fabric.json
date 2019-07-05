@@ -1,0 +1,137 @@
+{
+    "caliper": {
+        "blockchain": "fabric"
+    },
+    "fabric": {
+        "cryptodir": "/mnt/username/hyperledger/ctb/crypto-config/",
+        "network": {
+            "orderer": {
+                "name": "orderer",
+                "mspid": "OrdererMSP",
+                "msp": "/mnt/username/hyperledger/ctb/crypto-config/ordererOrganizations/example.com/msp/",
+                "user": {
+                    "key": "/mnt/username/hyperledger/ctb/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/12a7c23cf919bd3b69fe6611f52c432821b0975645c8d995673f37d4aef30a3c_sk",
+                    "cert": "/mnt/username/hyperledger/ctb/crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/signcerts/Admin@example.com-cert.pem"
+                },
+                "url": "grpcs://localhost:7050",
+                "server-hostname": "orderer.example.com",
+                "tls_cacerts": "/mnt/username/hyperledger/ctb/crypto-config/ordererOrganizations/example.com/msp/tlscacerts/tlsca.example.com-cert.pem"
+            },
+            "org1": {
+                "name": "org1",
+                "mspid": "Org1MSP",
+                "msp": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org1.example.com/msp/",
+                "user": {
+                    "key": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/1be8647fe948b8849d3d19d6d9072e5a73e13833b584b269083f5cefbf22ddfc_sk",
+                    "cert": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/signcerts/Admin@org1.example.com-cert.pem"
+                },
+                "ca": {
+                    "url": "http://localhost:7054",
+                    "name": "ca.org1.example.com"
+                },
+                "peer1": {
+                    "requests": "grpcs://localhost:7051",
+                    "events": "grpcs://localhost:7051",
+                    "server-hostname": "peer0.org1.example.com",
+                    "tls_cacerts": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt"
+                }
+            },
+            "org2": {
+                "name": "org2",
+                "mspid": "Org2MSP",
+                "msp": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org2.example.com/msp/",
+                "user": {
+                    "key": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/ebbd99c59b9e2bc7507b79ca8e3519922d32c771796287a3b6b3450efe16ffd4_sk",
+                    "cert": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/signcerts/Admin@org2.example.com-cert.pem"
+                },
+                "ca": {
+                    "url": "http://localhost:8054",
+                    "name": "ca.org2.example.com"
+                },
+                "peer1": {
+                    "requests": "grpcs://localhost:9051",
+                    "events": "grpcs://localhost:9051",
+                    "server-hostname": "peer0.org2.example.com",
+                    "tls_cacerts": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt"
+                }
+            },
+            "browser": {
+                "name": "browser",
+                "mspid": "BrowserMSP",
+                "msp": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/browser.example.com/msp/",
+                "user": {
+                    "key": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/browser.example.com/users/Admin@browser.example.com/msp/keystore/795618501defed6997efdb7ea4c0bc578340325ce3662580cb887045d64bad2f_sk",
+                    "cert": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/browser.example.com/users/Admin@browser.example.com/msp/signcerts/Admin@browser.example.com-cert.pem"
+                },
+                "ca": {
+                    "url": "http://localhost:9054",
+                    "name": "ca.browser.example.com"
+                },
+                "peer1": {
+                    "requests": "grpcs://localhost:11051",
+                    "events": "grpcs://localhost:11051",
+                    "server-hostname": "peer0.browser.example.com",
+                    "tls_cacerts": "/mnt/username/hyperledger/ctb/crypto-config/peerOrganizations/browser.example.com/peers/peer0.browser.example.com/tls/ca.crt"
+                }
+            }
+        },
+        "channel": [
+            {
+                "name": "mychannel",
+                "deployed": false,
+                "config": "/mnt/username/hyperledger/ctb/channel-artifacts/channel.tx",
+                "organizations": [
+                    "org1",
+                    "org2",
+                    "browser"
+                ]
+            }
+        ],
+        "chaincodes": [
+            {
+                "id": "mycc",
+                "path": "ctb",
+                "version": "1.0",
+                "init": [],
+                "language": "golang",
+                "channel": "mychannel"
+            }
+        ],
+        "endorsement-policy": {
+            "identities": [
+                {
+                    "role": {
+                        "name": "member",
+                        "mspId": "Org1MSP"
+                    }
+                },
+                {
+                    "role": {
+                        "name": "member",
+                        "mspId": "Org2MSP"
+                    }
+                }
+            ],
+            "policy": {
+                "2-of": [
+                    {
+                        "signed-by": 0
+                    },
+                    {
+                        "signed-by": 1
+                    }
+                ]
+            }
+        },
+        "context": {
+            "create": "mychannel",
+            "retrive": "mychannel"
+        }
+    },
+    "info": {
+        "Version": "0.1.0",
+        "Size": "3 Peers",
+        "Orderer": "Solo",
+        "Distribution": "Single Host"
+    }
+}
