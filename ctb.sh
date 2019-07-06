@@ -314,6 +314,8 @@ function networkDown() {
 function replacePrivateKey() {
   # sed on MacOSX does not support -i flag with a null extension. We will use
   # 't' for our back-up's extension and delete it at the end of the function
+  FILENAME=$1
+  EXT=$2
   ARCH=$(uname -s | grep Darwin)
   if [ "$ARCH" == "Darwin" ]; then
     OPTS="-it"
@@ -322,26 +324,77 @@ function replacePrivateKey() {
   fi
 
   # Copy the template to the file that will be modified to add the private key
-  cp docker-compose-ca-sample.yaml docker-compose-ca.yaml
+  cp $FILENAME-sample.$EXT $FILENAME.$EXT
 
   # The next steps will replace the template's contents with the
   # actual values of the private key file names for the two CAs.
   CURRENT_DIR=$PWD
 
+  cd crypto-config/ordererOrganizations/example.com/ca/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+  sed $OPTS "s/CA_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
+
   cd crypto-config/peerOrganizations/org1.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-ca.yaml
+  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
 
   cd crypto-config/peerOrganizations/org2.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-ca.yaml
+  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
 
   cd crypto-config/peerOrganizations/browser.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
-  sed $OPTS "s/CA3_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-ca.yaml
+  sed $OPTS "s/CA3_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
+
+  # If MacOSX, remove the temporary backup of the docker-compose file
+  if [ "$ARCH" == "Darwin" ]; then
+    rm docker-compose-e2e.yamlt
+  fi
+}
+
+function replaceUserPrivateKey() {
+  # sed on MacOSX does not support -i flag with a null extension. We will use
+  # 't' for our back-up's extension and delete it at the end of the function
+  FILENAME=$1
+  EXT=$2
+  ARCH=$(uname -s | grep Darwin)
+  if [ "$ARCH" == "Darwin" ]; then
+    OPTS="-it"
+  else
+    OPTS="-i"
+  fi
+
+  # Copy the template to the file that will be modified to add the private key
+  cp $FILENAME-sample.$EXT $FILENAME.$EXT
+
+  # The next steps will replace the template's contents with the
+  # actual values of the private key file names for the two CAs.
+  CURRENT_DIR=$PWD
+
+  cd crypto-config/ordererOrganizations/example.com/users/Admin@example.com/msp/keystore/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+  sed $OPTS "s/USER_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
+  sed $OPTS "s_ROOTPATH_${PWD}_g" $FILENAME.$EXT
+
+  cd crypto-config/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp/keystore/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+  sed $OPTS "s/USER1_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
+
+  cd crypto-config/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp/keystore/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+  sed $OPTS "s/USER2_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
+
+  cd crypto-config/peerOrganizations/browser.example.com/users/Admin@browser.example.com/msp/keystore/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+  sed $OPTS "s/USER3_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
 
   # If MacOSX, remove the temporary backup of the docker-compose file
   if [ "$ARCH" == "Darwin" ]; then
@@ -622,7 +675,8 @@ elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   # generateCerts
-  replacePrivateKey
+  replacePrivateKey docker-compose-ca yaml
+  replaceUserPrivateKey "caliper/fabric" json
   generateChannelArtifacts
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown

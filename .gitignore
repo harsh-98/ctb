@@ -7,9 +7,11 @@ sign/vendor
 sign/Gopkg.*
 server/access.log
 **/sig
+**/log/
 blockchain-explorer/logs/*
 docker-compose-ca.yaml
 crypto-config
+report-*.html
 /channel-artifacts/*.tx
 /channel-artifacts/*.block
 /channel-artifacts/*.json

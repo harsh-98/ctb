@@ -80,9 +80,9 @@ async function main() {
         const contract = network.getContract(request.txId);
 
         // Submit the specified transaction.
-        // addCertificate transaction - requires 2 args, ex: ('addCertificate', '')
-        // addCertificate transaction - requires 3 args, ex: ('addCertificate', '')
-        // revokeCertificate transaction - requires 3 args , ex: ('revokeCertificate', '')
+        // addCertificate transaction - requires 2 args, ex: ('addCertificate', '','')
+        // addCertificate transaction - requires 3 args, ex: ('addCertificate', '','','')
+        // revokeCertificate transaction - requires 3 args , ex: ('revokeCertificate', '','','')
         await contract.submitTransaction(request.fcn, ...request.args);
         console.log('Transaction has been submitted');
 
