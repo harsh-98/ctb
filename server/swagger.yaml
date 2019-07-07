@@ -1,0 +1,188 @@
+swagger: "2.0"
+info:
+  description: "Api swagger-ui for CTB CA server"
+  version: "1.0.0"
+  title: "CA server"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "harshjniitr@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: ""
+basePath: "/"
+tags:
+- name: "query"
+  description: "Query chaincode"
+  externalDocs:
+    description: "Find out more"
+    url: "https://github.com/harsh-98/ctb"
+- name: "invoke"
+  description: "Publish transaction to HLCTB"
+  externalDocs:
+    description: "Find out more"
+    url: "https://github.com/harsh-98/ctb"
+schemes:
+# - "https"
+- "http"
+paths:
+  /query/queryCertificate:
+    get:
+      tags:
+      - "query"
+      summary: "Get current valid certificate for domain in HLCTB"
+      description: ""
+      operationId: "addCertificate"
+      parameters:
+        - name: subjectName
+          in: query
+          required: true
+          description: domain name
+          schema:
+            type : string
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Success"
+        400:
+          description: "Bad function name"
+        404:
+          description: "Not Found"
+      security:
+      - petstore_auth:
+        - "read:Certificate"
+  /query/queryCertificateHistory:
+    get:
+      tags:
+      - "query"
+      summary: "Get certificate issue history for a domain"
+      description: ""
+      operationId: "queryCertificateHistory"
+      parameters:
+        - name: subjectName
+          in: query
+          required: true
+          description: domain name
+          schema:
+            type: string
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Success"
+        400:
+          description: "Bad function name"
+        404:
+          description: "Not Found"
+      security:
+      - petstore_auth:
+        - "read:CertificateHistory"
+  /invoke/addCertificate:
+    post:
+      tags:
+      - "invoke"
+      summary: "Issue certificate for a domain"
+      description: ""
+      operationId: "addCertificate"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/addCertificate"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Transaction has been submitted"
+        403:
+          description: "Not authenticated."
+        500:
+          description: "Transaction failed"
+      security:
+      - petstore_auth:
+        - "read:addCertificate"
+  /invoke/revokeCertificate:
+    post:
+      tags:
+      - "invoke"
+      summary: "Revoke certificate for a domain"
+      description: ""
+      operationId: "revokeCertificate"
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+          $ref: "#/definitions/revokeCertificate"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Transaction has been submitted"
+        403:
+          description: "Not authenticated."
+        500:
+          description: "Transaction failed"
+      security:
+      - petstore_auth:
+        - "read:revokeCertificate"
+definitions:
+  Certificate:
+    type: "object"
+    properties:
+      certString:
+        type: "string"
+      subjectName:
+        type: "string"
+      revokeStatus:
+        type: "string"
+        enum:
+        - "notRevoked"
+        - "revoked"
+  CertificateHistory:
+    type: "array"
+    properties:
+      Value:
+        $ref: "#/definitions/Certificate"
+      TxId:
+        type: "string"
+      Timestamp:
+        type: "array"
+      IsDelete:
+        type: "boolean"
+        default: false
+  addCertificate:
+    type: "object"
+    properties:
+      certString:
+        type: "string"
+        description: "Certificate string for domain"
+      intermedCert:
+        type: "string"
+        description: "Certificate string for ca"
+      sigString:
+        type: "string"
+        description: "New certificate signed by current private key of domain"
+  revokeCertificate:
+    type: "object"
+    properties:
+      certString:
+        type: "string"
+        description: "Certificate string for domain"
+      intermedCert:
+        type: "string"
+        description: "Certificate string for ca"
+      sigString:
+        type: "string"
+        description: "Certificate signed by current private key of ca"
+servers:
+  - url: http://localhost:8000
+    description: Local test ca server
