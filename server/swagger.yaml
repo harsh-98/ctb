@@ -12,6 +12,11 @@ info:
 host: ""
 basePath: "/"
 tags:
+- name: "login"
+  description: "Login for CA server"
+  externalDocs:
+    description: "Find out more"
+    url: "https://github.com/harsh-98/ctb"
 - name: "query"
   description: "Query chaincode"
   externalDocs:
@@ -26,6 +31,29 @@ schemes:
 # - "https"
 - "http"
 paths:
+  /login:
+    post:
+      tags:
+      - "login"
+      summary: "Logging in CA server"
+      description: ""
+      operationId: "login"
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type : string
+        - name: password
+          in: query
+          required: true
+          schema:
+            type : string
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Success"
   /query/queryCertificate:
     get:
       tags:

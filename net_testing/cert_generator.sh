@@ -75,7 +75,7 @@ push_cert() {
     sig_string=""
     fi
 
-    echo -n $sig_string> $DOMAIN/sig
+    echo -n $sig_string> $NEWDOMAIN/sig
 
     while [ $LOCK == 1 ]
     do
