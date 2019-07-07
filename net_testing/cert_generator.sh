@@ -75,8 +75,7 @@ push_cert() {
     sig_string=""
     fi
 
-    echo "sig_string is $sig_string"
-    # local response=`curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\",\"peer\": \"$NEWDOMAIN\"}"`
+    echo -n $sig_string> $DOMAIN/sig
 
     while [ $LOCK == 1 ]
     do
@@ -111,8 +110,7 @@ revoke_cert() {
     echo "##########################################################"
 
     sig_string=`$CMDSTRING`
-    echo -n > $DOMAIN/sig
-    # local response=`curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\",\"revoke\": \"true\",\"peer\": \"$DOMAIN\"}"`
+    echo -n $sig_string > $DOMAIN/sig
 
     while [ $LOCK == 1 ]
     do

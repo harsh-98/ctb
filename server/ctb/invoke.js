@@ -14,40 +14,41 @@ const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
 async function main(req, res, next) {
+    if (!req.isAuthenticated()){
+        res.status(403).json({"response": "Not authenticated."});
+    }
+
     var args = process.argv.slice(2);
-    // let username = args[0];
     let username = process.env.QUERYUSER;
+    let CHAINCODE = process.env.CHAINCODE;
+    let CHANNEL = process.env.CHANNEL;
 
-    // var certPath = args[1];
-    // var intermediateCertPath = args[2];
-    var sigString = req.body['sig_string'];
-    var revoke = req.body['revoke'];
-
-    // var certString = fs.readFileSync(certPath).toString();
-    let certString = req.body['cert_string'];
-    // var intermediateCertString = fs.readFileSync(intermediateCertPath).toString();
-    let intermediateCertString = req.body['intermed_cert'];
+    let fcn = req.params.fcn;
+    let certString = req.body['certString'];
+    let intermediateCertString = req.body['intermedCert'];
+    var sigString = req.body['sigString'] ? req.body['sigString'] : ""
 
     let tx_id = "mycc";
-    if (revoke != "true") {
+    if (fcn == "addCertificate") {
             var request = {
         //targets: let default to the peer assigned to the client
-            chaincodeId: tx_id,
+            chaincodeId: CHAINCODE,
             fcn: 'addCertificate',
             args: [certString, intermediateCertString, sigString],
-            chainId: 'mychannel',
-            txId: tx_id
+            chainId: CHANNEL,
         };
-    } else if (revoke === 'true') {
+    } else if (fcn == "revokeCertificate") {
           var request = {
         //targets: let default to the peer assigned to the client
             chaincodeId: tx_id,
             fcn: 'revokeCertificate',
             args: [certString, intermediateCertString, sigString],
-            chainId: 'mychannel',
-            txId: tx_id
-        };
+            chainId: CHANNEL,
+        }
+    } else {
+        res.status(400).json({"response": "Bad function name"});
     }
+
     try {
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'wallet');
@@ -71,7 +72,7 @@ async function main(req, res, next) {
         const network = await gateway.getNetwork(request.chainId);
 
         // Get the contract from the network.
-        const contract = network.getContract(request.txId);
+        const contract = network.getContract(request.chaincodeId);
 
         // Submit the specified transaction.
         // addCertificate transaction - requires 2 args, ex: ('addCertificate', '')
@@ -81,14 +82,14 @@ async function main(req, res, next) {
             await contract.submitTransaction(request.fcn, ...request.args);
         } catch (error) {
             // throw new Error(req.body['peer']);
-            res.status(200).json({"response": "Transaction failed"});
+            res.status(500).json({"response": "Transaction failed"});
         }
         // Disconnect from the gateway.
         await gateway.disconnect();
         res.status(200).json({"response": "Transaction has been submitted"});
 
     } catch (error) {
-        res.status(200).json({"response": "Transaction failed"});
+        res.status(500).json({"response": "Transaction failed"});
         console.error(`Failed to submit transaction: ${error}`);
         process.exit(1);
     }

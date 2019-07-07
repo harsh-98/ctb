@@ -24,7 +24,7 @@ var socket = tls.connect(8080, domain, options, async () => {
     let derBuffer = socket.getPeerCertificate().raw;
     let siteCert = getPEMCert(derBuffer);
 
-    const resp  = await axios.get(`http://localhost:8000?subjectname=${domain}&func=queryCertificate`)
+    const resp  = await axios.get(`http://localhost:8000/query/queryCertificate?subjectName=${domain}`)
     let json = resp.data;
 
     // console.log(siteCert);

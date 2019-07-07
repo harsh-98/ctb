@@ -74,7 +74,7 @@ push_cert() {
     fi
 
     echo "sig_string is $sig_string"
-    local response=`curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\",\"peer\": \"$NEWDOMAIN\"}"`
+    local response=`curl localhost:8000/invoke/addCertificate -H "Content-Type: application/json" -d  "{\"certString\": \"$cert_string\",\"intermedCert\": \"$intermed_cert\",\"sigString\": \"$sig_string\",\"peer\": \"$NEWDOMAIN\"}"`
 
     while [ $LOCK == 1 ]
     do
@@ -110,7 +110,7 @@ revoke_cert() {
 
     sig_string=`$CMDSTRING`
     echo "sig_string is $sig_string\n"
-    local response=`curl localhost:8000/invoke -H "Content-Type: application/json" -d  "{\"cert_string\": \"$cert_string\",\"intermed_cert\": \"$intermed_cert\",\"sig_string\": \"$sig_string\",\"revoke\": \"true\",\"peer\": \"$DOMAIN\"}"`
+    local response=`curl localhost:8000/invoke/revokeCertificate -H "Content-Type: application/json" -d  "{\"certString\": \"$cert_string\",\"intermedCert\": \"$intermed_cert\",\"sigString\": \"$sig_string\",\"revoke\": \"true\",\"peer\": \"$DOMAIN\"}"`
 
     while [ $LOCK == 1 ]
     do

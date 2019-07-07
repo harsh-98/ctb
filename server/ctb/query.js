@@ -13,11 +13,18 @@ const ccpPath = path.resolve(__dirname, 'connect.json');
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 
-export async function main(req, res, next) {
+export default async function query(req, res, next) {
     try {
         let username = process.env.QUERYUSER;
-        let subjectName =  req.query.subjectname;
-        let func =  req.query.func;
+        let CHAINCODE = process.env.CHAINCODE;
+        let CHANNEL = process.env.CHANNEL;
+
+        let subjectName =  req.query.subjectName;
+        let fcn = req.params.fcn;
+
+        if (!['queryCertificate', 'queryCertificateHistory'].includes(fcn)) {
+            return res.status(400).json({'response': 'Bad function name'});
+        }
 
         // load keys for "username"
         const walletPath = path.join(process.cwd(), 'wallet');
@@ -37,16 +44,20 @@ export async function main(req, res, next) {
         await gateway.connect(ccp, { wallet, identity: username, discovery: { enabled: false } });
 
         // Get the network (channel) our contract is deployed to.
-        const network = await gateway.getNetwork('mychannel');
+        const network = await gateway.getNetwork(CHANNEL);
 
         // Get the contract from the network.
-        const contract = network.getContract('mycc');
+        const contract = network.getContract(CHAINCODE);
 
         // Evaluate the specified transaction.
         // queryCertificate transaction - requires 1 argument, ex: ('queryCertificate', 'example.com')
         // queryCertificateHistory transaction - requires 1 arguments, ex: ('queryCertificateHistory', 'domain.com')
-        const result = await contract.evaluateTransaction(func, subjectName);
-        console.log(`Transaction has been evaluated, result is: ${result.toString()}`);
+        let result = "{}";
+        try {
+            result = await contract.evaluateTransaction(fcn, subjectName);
+        } catch (error) {
+            res.status(404).json({"response": "Entry Not available"});
+        }
         res.status(200).json(JSON.parse(result.toString()));
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
