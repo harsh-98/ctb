@@ -101,28 +101,27 @@ installChaincode 0 browser
 echo "Instantiating chaincode on peer0.org2..."
 instantiateChaincode 0 org1
 
-sleep 4
 # Invoke chaincode on peer0.org1 and peer0.org2
 echo "Sending invoke transaction on peer0.org1 peer0.org2..."
-exit 0
 # adding the first certificate for domain.com
+sleep 4
 chaincodeInvoke 0 org1 0 org2
-sleep 2
-chaincodeQuery 1 browser domain.com
-
+sleep 4
+chaincodeQuery 0 browser domain.com
+exit 0
 
 # adding a new certificate for domain.com while the current one is active
 newChaincodeInvoke 0 org1 0 org2
 sleep 2
-chaincodeQuery 1 browser domain.com
+chaincodeQuery 0 browser domain.com
 
 # revoking the current certificate
 revokeCertificate 0 org1 0 org2
 sleep 2
-chaincodeQuery 1 browser domain.com
+chaincodeQuery 0 browser domain.com
 
 # getting certificate history
-queryHistory 1 browser domain.com
+queryHistory 0 browser domain.com
 
 echo
 echo "========= All GOOD, BYFN execution completed =========== "

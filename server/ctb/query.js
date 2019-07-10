@@ -7,6 +7,8 @@
 const { FileSystemWallet, Gateway } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
+const forge = require('node-forge')
+const { pki, md } = forge
 require('dotenv').config()
 
 const ccpPath = path.resolve(__dirname, 'connect.json');
@@ -56,9 +58,26 @@ export default async function query(req, res, next) {
         try {
             result = await contract.evaluateTransaction(fcn, subjectName);
         } catch (error) {
-            res.status(404).json({"response": "Entry Not available"});
+            return res.status(404).json({"response": "Entry Not available"});
         }
-        res.status(200).json(JSON.parse(result.toString()));
+        let certInfo = JSON.parse(result.toString());
+        // let cert = certInfo['certString']
+
+        let certBuf = Buffer.from(certInfo['certString'], 'utf8')
+        const cert = pki.certificateFromPem(certBuf);
+        const der = forge.asn1.toDer(pki.certificateToAsn1(cert)).getBytes();
+        const m = md.sha256.create();
+        m.start();
+        m.update(der);
+        const fingerprint = m.digest()
+      .toHex()
+      .match(/.{2}/g)
+      .join(':')
+      .toUpperCase();
+        console.log(fingerprint)
+        certInfo['fingerPrint'] = fingerprint
+
+        res.status(200).json(certInfo);
     } catch (error) {
         console.error(`Failed to evaluate transaction: ${error}`);
         process.exit(1);

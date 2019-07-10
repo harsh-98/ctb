@@ -186,8 +186,8 @@ chaincodeQuery() {
     sleep $DELAY
     echo "Attempting to Query peer${PEER}.${ORG} ...$(($(date +%s) - starttime)) secs"
     set -x
-    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["queryCertificate","'$DOMAIN'"]}' >&log.txt
-    res=$?
+    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["queryCertificate","'$DOMAIN'"]}'
+    rc=$?
     set +x
   done
 }
@@ -209,8 +209,8 @@ queryHistory() {
     sleep $DELAY
     echo "Attempting to Query peer${PEER}.${ORG} ...$(($(date +%s) - starttime)) secs"
     set -x
-    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["queryCertificateHistory","'$DOMAIN'"]}' >&log.txt
-    res=$?
+    peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["queryCertificateHistory","'$DOMAIN'"]}'
+    rc=$?
     set +x
   done
 }

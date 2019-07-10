@@ -355,7 +355,32 @@ function replacePrivateKey() {
     rm docker-compose-e2e.yamlt
   fi
 }
+function makeOrgYaml(){
+  COUNT_NAME=$1
+  ORG_NAME=org$COUNT_NAME
+  MSP_NAME=Org$COUNT_NAME
+  COUNT_NAME=$(( $COUNT_NAME + 6))
+  CURRENT_DIR=$PWD
+  ARCH=$(uname -s | grep Darwin)
+  if [ "$ARCH" == "Darwin" ]; then
+    OPTS="-it"
+  else
+    OPTS="-i"
+  fi
+  LOCALHOST=${2:-"127.0.0.1:"}
 
+  cp docker-compose-org-sample.yaml docker-compose-org-$ORG_NAME.yaml
+
+  cd crypto-config/peerOrganizations/$ORG_NAME.example.com/ca/
+  PRIV_KEY=$(ls *_sk)
+  cd "$CURRENT_DIR"
+
+  sed $OPTS "s/CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-org-$ORG_NAME.yaml
+  sed $OPTS "s/COUNT_NAME/${COUNT_NAME}/g" docker-compose-org-$ORG_NAME.yaml
+  sed $OPTS "s/ORG_NAME/${ORG_NAME}/g" docker-compose-org-$ORG_NAME.yaml
+  sed $OPTS "s/MSP_NAME/${MSP_NAME}/g" docker-compose-org-$ORG_NAME.yaml
+  sed $OPTS "s/LOCALHOST/${LOCALHOST}/g" docker-compose-org-$ORG_NAME.yaml
+}
 function replaceUserPrivateKey() {
   # sed on MacOSX does not support -i flag with a null extension. We will use
   # 't' for our back-up's extension and delete it at the end of the function
@@ -615,6 +640,8 @@ elif [ "$MODE" == "upgrade" ]; then
   EXPMODE="Upgrading the network"
 elif [ "$MODE" == "test" ]; then
   EXPMODE="running test case"
+elif [ "$MODE" == "make" ]; then
+  EXPMODE="Convert sample org to deployable org"
 else
   printHelp
   exit 1
@@ -685,6 +712,8 @@ elif [ "${MODE}" == "upgrade" ]; then ## Upgrade the network from version 1.2.x 
   upgradeNetwork
 elif [ "${MODE}" == "test" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   testcases
+elif [ "${MODE}" == "make" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
+  makeOrgYaml 1
 else
   printHelp
   exit 1

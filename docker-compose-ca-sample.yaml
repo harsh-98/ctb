@@ -64,8 +64,8 @@ services:
     # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
     # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
     environment:
-      - COUCHDB_USER=
-      - COUCHDB_PASSWORD=
+      - COUCHDB_USER=couch
+      - COUCHDB_PASSWORD=couchpw
     ports:
       - 5984:5984
     networks:
@@ -88,8 +88,8 @@ services:
     # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
     # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
     environment:
-      - COUCHDB_USER=
-      - COUCHDB_PASSWORD=
+      - COUCHDB_USER=couch
+      - COUCHDB_PASSWORD=couchpw
     ports:
       - 127.0.0.1:6984:5984
     networks:
@@ -112,8 +112,8 @@ services:
     # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
     # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
     environment:
-      - COUCHDB_USER=
-      - COUCHDB_PASSWORD=
+      - COUCHDB_USER=couch
+      - COUCHDB_PASSWORD=couchpw
     ports:
       - 127.0.0.1:7984:5984
     networks:

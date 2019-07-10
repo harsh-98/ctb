@@ -23,8 +23,12 @@ services:
       - CORE_PEER_TLS_CERT_FILE=/etc/hyperledger/fabric/tls/server.crt
       - CORE_PEER_TLS_KEY_FILE=/etc/hyperledger/fabric/tls/server.key
       - CORE_PEER_TLS_ROOTCERT_FILE=/etc/hyperledger/fabric/tls/ca.crt
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME=couch
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD=couchpw
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_MAXBATCHUPDATESIZE=10000
     working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
     command: peer node start
+
 
   orderer-base:
     image: hyperledger/fabric-orderer:$IMAGE_TAG
