@@ -7,9 +7,6 @@
 # This is a collection of bash functions used by different scripts
 
 ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
-PEER0_ORG1_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-PEER0_ORG2_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/peers/peer0.org2.example.com/tls/ca.crt
-PEER0_BROWSER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/browser.example.com/peers/peer0.browser.example.com/tls/ca.crt
 
 # verify the result of the end-to-end test
 verifyResult() {
@@ -28,39 +25,27 @@ setOrdererGlobals() {
   CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/users/Admin@example.com/msp
 }
 
+function getPeerCrt(){
+  ORG=$1
+  echo "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/$ORG.example.com/peers/peer0.$ORG.example.com/tls/ca.crt"
+}
+
+function getMSPPath(){
+  ORG=$1
+  echo "/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/$ORG.example.com/users/Admin@$ORG.example.com/msp"
+}
+
 setGlobals() {
   PEER=$1
   ORG=$2
-  if [ $ORG == "org1" ]; then
-    CORE_PEER_LOCALMSPID="Org1MSP"
-    CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG1_CA
-    CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
-    if [ $PEER -eq 0 ]; then
-      CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-    else
-      CORE_PEER_ADDRESS=peer1.org1.example.com:7051
-    fi
-  elif [ $ORG == "org2" ]; then
-    CORE_PEER_LOCALMSPID="Org2MSP"
-    CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_ORG2_CA
-    CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org2.example.com/users/Admin@org2.example.com/msp
-    if [ $PEER -eq 0 ]; then
-      CORE_PEER_ADDRESS=peer0.org2.example.com:7051
-    else
-      CORE_PEER_ADDRESS=peer1.org2.example.com:7051
-    fi
-
-  elif [ $ORG == "browser" ]; then
-    CORE_PEER_LOCALMSPID="BrowserMSP"
-    CORE_PEER_TLS_ROOTCERT_FILE=$PEER0_BROWSER_CA
-    CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/browser.example.com/users/Admin@browser.example.com/msp
-    if [ $PEER -eq 0 ]; then
-      CORE_PEER_ADDRESS=peer0.browser.example.com:7051
-    else
-      CORE_PEER_ADDRESS=peer1.browser.example.com:7051
-    fi
+  MSPID=${ORG^}
+  CORE_PEER_LOCALMSPID="${MSPID}MSP"
+  CORE_PEER_TLS_ROOTCERT_FILE=`getPeerCrt $ORG`
+  CORE_PEER_MSPCONFIGPATH=`getMSPPath $ORG`
+  if [ $PEER -eq 0 ]; then
+    CORE_PEER_ADDRESS=peer0.$ORG.example.com:7051
   else
-    echo "================== ERROR !!! ORG Unknown =================="
+    CORE_PEER_ADDRESS=peer1.$ORG.example.com:7051
   fi
 
   if [ "$VERBOSE" == "true" ]; then
@@ -287,10 +272,9 @@ parsePeerConnectionParameters() {
     PEER="peer$1.$2"
     PEERS="$PEERS $PEER"
     PEER_CONN_PARMS="$PEER_CONN_PARMS --peerAddresses $CORE_PEER_ADDRESS"
-    ORG=$(echo $2 | tr '[:lower:]' '[:upper:]')
     if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "true" ]; then
-      TLSINFO=$(echo "--tlsRootCertFiles \$PEER$1_$ORG _CA" | sed "s/ _CA/_CA/g")
-      TLSINFO=$(eval echo $TLSINFO)
+      ROOTCERT=`getPeerCrt $2`
+      TLSINFO="--tlsRootCertFiles $ROOTCERT"
       PEER_CONN_PARMS="$PEER_CONN_PARMS $TLSINFO"
     fi
     # shift by two to get the next pair of peer/org parameters
