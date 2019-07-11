@@ -1,0 +1,70 @@
+version: '2'
+
+networks:
+  outside:
+    external:
+      name: net_byfn
+
+volumes:
+  peer0.ORG_NAME.example.com:
+
+services:
+  ca.ORG_NAME.example.com:
+    image: hyperledger/fabric-ca
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca.ORG_NAME.example.com
+      - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.ORG_NAME.example.com-cert.pem
+      - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/CA_PRIVATE_KEY
+    ports:
+      - "127.0.0.1:COUNT_NAME054:7054"
+    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    volumes:
+      - ./crypto-config/peerOrganizations/ORG_NAME.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
+    container_name: ca.ORG_NAME.example.com
+    networks:
+      - outside
+
+
+  couchdb.peer0.ORG_NAME.example.com:
+    container_name: couchdb.peer0.ORG_NAME.example.com
+    image: hyperledger/fabric-couchdb
+    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+    environment:
+      - COUCHDB_USER=couch
+      - COUCHDB_PASSWORD=couchpw
+    ports:
+      - LOCALHOSTCOUNT_NAME984:5984
+    networks:
+      - outside
+
+
+  peer0.ORG_NAME.example.com:
+    container_name: peer0.ORG_NAME.example.com
+    extends:
+      file: base/peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.ORG_NAME.example.com
+      - CORE_PEER_ADDRESS=peer0.ORG_NAME.example.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.ORG_NAME.example.com:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.ORG_NAME.example.com:7051
+      # - CORE_PEER_GOSSIP_BOOTSTRAP=peer1.ORG_NAME.example.com:8051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.ORG_NAME.example.com:7051
+      - CORE_PEER_LOCALMSPID=MSP_NAMEMSP
+      - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb.peer0.ORG_NAME.example.com:5984
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/ORG_NAME.example.com/peers/peer0.ORG_NAME.example.com/msp:/etc/hyperledger/fabric/msp
+        - ./crypto-config/peerOrganizations/ORG_NAME.example.com/peers/peer0.ORG_NAME.example.com/tls:/etc/hyperledger/fabric/tls
+        - peer0.ORG_NAME.example.com:/var/hyperledger/production
+    ports:
+      - 127.0.0.1:COUNT_NAME051:7051
+    depends_on:
+      - couchdb.peer0.ORG_NAME.example.com
+    networks:
+      - outside

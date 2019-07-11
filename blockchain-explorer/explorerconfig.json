@@ -2,7 +2,7 @@
 	"persistence": "postgreSQL",
 	"platforms": ["fabric"],
 	"postgreSQL": {
-		"host": "192.168.1.207",
+		"host": "172.17.0.1",
 		"port": "5432",
 		"database": "fabricexplorer",
 		"username": "hppoc",

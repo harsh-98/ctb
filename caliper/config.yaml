@@ -12,7 +12,7 @@ test:
     type: local
     number: 1
   rounds:
-  - label: retrive
+  - label: addCerts
     txNumber:
     - 100
     rateControl:
@@ -20,7 +20,7 @@ test:
       opts:
         tps: 10
     callback: ctb/pushCert.js
-  - label: create
+  - label: queryCerts
     txNumber:
     - 1000
     - 300

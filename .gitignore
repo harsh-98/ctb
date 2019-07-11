@@ -9,10 +9,10 @@ sign/vendor
 sign/Gopkg.*
 server/access.log
 **/sig
-
+**/docker-compose-deploy-*.yaml
 blockchain-explorer/logs/*
 
-net_testing/**/*
+net_testing/**/
 
 docker-compose-ca.yaml
 crypto-config

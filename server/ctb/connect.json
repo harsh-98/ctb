@@ -76,7 +76,7 @@
 			}
         },
         "peer0.org2.example.com": {
-            "url": "grpcs://localhost:9051",
+            "url": "grpcs://localhost:8051",
 			"grpcOptions": {
 				"ssl-target-name-override": "peer0.org2.example.com",
 				"request-timeout": 120001
@@ -86,7 +86,7 @@
 			}
         },
         "peer0.browser.example.com": {
-            "url": "grpcs://localhost:11051",
+            "url": "grpcs://localhost:9051",
 			"grpcOptions": {
 				"ssl-target-name-override": "peer0.browser.example.com",
 				"request-timeout": 120001

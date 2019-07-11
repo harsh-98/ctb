@@ -8,11 +8,8 @@ version: '2'
 volumes:
   orderer.example.com:
   peer0.org1.example.com:
-  # peer1.org1.example.com:
   peer0.org2.example.com:
-  # peer1.org2.example.com:
   peer0.browser.example.com:
-  # peer1.browser.example.com:
 
 networks:
   byfn:
@@ -26,54 +23,6 @@ services:
     container_name: orderer.example.com
     networks:
       - byfn
-
-  peer0.org1.example.com:
-    container_name: peer0.org1.example.com
-    extends:
-      file:  base/docker-compose-base.yaml
-      service: peer0.org1.example.com
-    networks:
-      - byfn
-
-  # peer1.org1.example.com:
-  #   container_name: peer1.org1.example.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer1.org1.example.com
-  #   networks:
-  #     - byfn
-
-  peer0.org2.example.com:
-    container_name: peer0.org2.example.com
-    extends:
-      file:  base/docker-compose-base.yaml
-      service: peer0.org2.example.com
-    networks:
-      - byfn
-
-  # peer1.org2.example.com:
-  #   container_name: peer1.org2.example.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer1.org2.example.com
-  #   networks:
-  #     - byfn
-
-  peer0.browser.example.com:
-    container_name: peer0.browser.example.com
-    extends:
-      file:  base/docker-compose-base.yaml
-      service: peer0.browser.example.com
-    networks:
-      - byfn
-
-  # peer1.browser.example.com:
-  #   container_name: peer1.browser.example.com
-  #   extends:
-  #     file:  base/docker-compose-base.yaml
-  #     service: peer1.browser.example.com
-  #   networks:
-  #     - byfn
 
   cli:
     container_name: cli
@@ -103,11 +52,5 @@ services:
         - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
     depends_on:
       - orderer.example.com
-      - peer0.org1.example.com
-      # - peer1.org1.example.com
-      - peer0.org2.example.com
-      # - peer1.org2.example.com
-      - peer0.browser.example.com
-      # - peer1.browser.example.com
     networks:
       - byfn

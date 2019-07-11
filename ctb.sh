@@ -1,33 +1,4 @@
 #!/bin/bash
-#
-# Copyright IBM Corp All Rights Reserved
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-
-# This script will orchestrate a sample end-to-end execution of the Hyperledger
-# Fabric network.
-#
-# The end-to-end verification provisions a sample Fabric network consisting of
-# two organizations, each maintaining two peers, and a “solo” ordering service.
-#
-# This verification makes use of two fundamental tools, which are necessary to
-# create a functioning transactional network with digital signature validation
-# and access control:
-#
-# * cryptogen - generates the x509 certificates used to identify and
-#   authenticate the various components in the network.
-# * configtxgen - generates the requisite configuration artifacts for orderer
-#   bootstrap and channel creation.
-#
-# Each tool consumes a configuration yaml file, within which we specify the topology
-# of our network (cryptogen) and the location of our certificates for various
-# configuration operations (configtxgen).  Once the tools have been successfully run,
-# we are able to launch our network.  More detail on the tools and the structure of
-# the network will be provided later in this document.  For now, let's get going...
-
-# prepending $PWD/../bin to PATH to ensure we are picking up the correct binaries
-# this may be commented out to resolve installed version of tools if desired
 export PATH=${PWD}/bin:${PWD}:$PATH
 export FABRIC_CFG_PATH=${PWD}
 export VERBOSE=false
@@ -35,56 +6,21 @@ export VERBOSE=false
 # Print the usage message
 function printHelp() {
   echo "Usage: "
-  echo "  byfn.sh <mode> [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>] [-l <language>] [-o <consensus-type>] [-i <imagetag>] [-v]"
+  echo "  ctb.sh <mode> [-v]"
   echo "    <mode> - one of 'up', 'down', 'restart', 'generate' or 'upgrade'"
   echo "      - 'up' - bring up the network with docker-compose up"
-  echo "      - 'down' - clear the network with docker-compose down"
-  echo "      - 'restart' - restart the network"
   echo "      - 'generate' - generate required certificates and genesis block"
-  echo "      - 'upgrade'  - upgrade the network from version 1.3.x to 1.4.0"
-  echo "    -c <channel name> - channel name to use (defaults to \"mychannel\")"
-  echo "    -t <timeout> - CLI timeout duration in seconds (defaults to 10)"
-  echo "    -d <delay> - delay duration in seconds (defaults to 3)"
-  echo "    -f <docker-compose-file> - specify which docker-compose file use (defaults to docker-compose-cli.yaml)"
-  echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
-  echo "    -l <language> - the chaincode language: golang (default) or node"
-  echo "    -o <consensus-type> - the consensus-type of the ordering service: solo (default), kafka, or etcdraft"
-  echo "    -i <imagetag> - the tag to be used to launch the network (defaults to \"latest\")"
-  echo "    -v - verbose mode"
-  echo "  byfn.sh -h (print this message)"
+  echo "      - 'down' - clear the network with docker-compose down"
+  echo "      - 'test' - create channel and instantiate ctb chaincode"
+  echo "      - 'make'  - generate org docker-compose file"
+  echo "  ctb.sh -h (print this message)"
   echo
-  echo "Typically, one would first generate the required certificates and "
-  echo "genesis block, then bring up the network. e.g.:"
-  echo
-  echo "	byfn.sh generate -c mychannel"
-  echo "	byfn.sh up -c mychannel -s couchdb"
-  echo "        byfn.sh up -c mychannel -s couchdb -i 1.4.0"
-  echo "	byfn.sh up -l node"
-  echo "	byfn.sh down -c mychannel"
-  echo "        byfn.sh upgrade -c mychannel"
-  echo
-  echo "Taking all defaults:"
-  echo "	byfn.sh generate"
-  echo "	byfn.sh up"
-  echo "	byfn.sh down"
-}
-
-# Ask user for confirmation to proceed
-function askProceed() {
-  read -p "Continue? [Y/n] " ans
-  case "$ans" in
-  y | Y | "")
-    echo "proceeding ..."
-    ;;
-  n | N)
-    echo "exiting..."
-    exit 1
-    ;;
-  *)
-    echo "invalid response"
-    askProceed
-    ;;
-  esac
+  echo "Operations: "
+  echo "	ctb.sh generate"
+  echo "	ctb.sh up"
+  echo "	ctb.sh down"
+  echo "	ctb.sh test"
+  echo "	ctb.sh make"
 }
 
 # Obtain CONTAINER_IDS and remove them
@@ -156,50 +92,20 @@ function networkUp() {
     # replacePrivateKey
     generateChannelArtifacts
   fi
-  if [ "${IF_COUCHDB}" == "couchdb" ]; then
-    if [ "$CONSENSUS_TYPE" == "kafka" ]; then
-      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_KAFKA -f $COMPOSE_FILE_COUCH up -d 2>&1
-      docker ps -a
-    elif  [ "$CONSENSUS_TYPE" == "etcdraft" ]; then
-      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_RAFT2 -f $COMPOSE_FILE_COUCH up -d 2>&1
-      docker ps -a
-    else
-      IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-ca.yaml -f $COMPOSE_FILE_COUCH up -d 2>&1
-      sleep 5
-      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH up -d 2>&1
-      docker ps -a
-    fi
-  else
-    if [ "$CONSENSUS_TYPE" == "kafka" ]; then
-      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_KAFKA up -d 2>&1
-      docker ps -a
-    elif  [ "$CONSENSUS_TYPE" == "etcdraft" ]; then
-      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_RAFT2 up -d 2>&1
-      docker ps -a
-    else
-      IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-ca.yaml up -d 2>&1
-      sleep 5
-      IMAGE_TAG=$IMAGETAG docker-compose -f $COMPOSE_FILE up -d 2>&1
-      docker ps -a
-    fi
-  fi
+
+  IMAGE_TAG=$IMAGETAG docker-compose -f docker-compose-cli.yaml up -d 2>&1
+  for i in `ls docker-compose-deploy-*yaml`
+  do
+    IMAGE_TAG=$IMAGETAG docker-compose -f $i up -d 2>&1
+  done
+  docker ps -a
+
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Unable to start network"
     exit 1
   fi
-
-  if [ "$CONSENSUS_TYPE" == "kafka" ]; then
-    sleep 1
-    echo "Sleeping 10s to allow $CONSENSUS_TYPE cluster to complete booting"
-    sleep 9
-  fi
-
-  if [ "$CONSENSUS_TYPE" == "etcdraft" ]; then
-    sleep 1
-    echo "Sleeping 15s to allow $CONSENSUS_TYPE cluster to complete booting"
-    sleep 14
-  fi
 }
+
 function testcases(){
   # now run the end to end script
   docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
@@ -289,8 +195,11 @@ function networkDown() {
   # stop org3 containers also in addition to org1 and org2, in case we were running sample to add org3
   # stop kafka and zookeeper containers in case we're running with kafka consensus-type
   # docker-compose -f $COMPOSE_FILE -f $COMPOSE_FILE_COUCH -f $COMPOSE_FILE_KAFKA -f $COMPOSE_FILE_RAFT2 down --volumes --remove-orphans
-  docker-compose -f $COMPOSE_FILE down --volumes --remove-orphans
-  docker-compose -f docker-compose-ca.yaml down --volumes --remove-orphans
+  docker-compose -f docker-compose-cli.yaml down --volumes --remove-orphans
+  for i in `ls docker-compose-deploy-*yaml`
+  do
+    docker-compose -f $i down --volumes --remove-orphans
+  done
 
   # Don't remove the generated artifacts -- note, the ledgers are always removed
   if [ "$MODE" != "restart" ]; then
@@ -303,62 +212,13 @@ function networkDown() {
     removeUnwantedImages
     # remove orderer block and other channel configuration transactions and certs
     rm -rf channel-artifacts/*.block channel-artifacts/*.tx ./org3-artifacts/crypto-config/ channel-artifacts/org3.json
-    # remove the docker-compose yaml file that was customized to the example
-    rm -f docker-compose-e2e.yaml
   fi
 }
 
-# Using docker-compose-e2e-template.yaml, replace constants with private key file names
-# generated by the cryptogen tool and output a docker-compose.yaml specific to this
-# configuration
-function replacePrivateKey() {
-  # sed on MacOSX does not support -i flag with a null extension. We will use
-  # 't' for our back-up's extension and delete it at the end of the function
-  FILENAME=$1
-  EXT=$2
-  ARCH=$(uname -s | grep Darwin)
-  if [ "$ARCH" == "Darwin" ]; then
-    OPTS="-it"
-  else
-    OPTS="-i"
-  fi
-
-  # Copy the template to the file that will be modified to add the private key
-  cp $FILENAME-sample.$EXT $FILENAME.$EXT
-
-  # The next steps will replace the template's contents with the
-  # actual values of the private key file names for the two CAs.
-  CURRENT_DIR=$PWD
-
-  cd crypto-config/ordererOrganizations/example.com/ca/
-  PRIV_KEY=$(ls *_sk)
-  cd "$CURRENT_DIR"
-  sed $OPTS "s/CA_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
-
-  cd crypto-config/peerOrganizations/org1.example.com/ca/
-  PRIV_KEY=$(ls *_sk)
-  cd "$CURRENT_DIR"
-  sed $OPTS "s/CA1_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
-
-  cd crypto-config/peerOrganizations/org2.example.com/ca/
-  PRIV_KEY=$(ls *_sk)
-  cd "$CURRENT_DIR"
-  sed $OPTS "s/CA2_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
-
-  cd crypto-config/peerOrganizations/browser.example.com/ca/
-  PRIV_KEY=$(ls *_sk)
-  cd "$CURRENT_DIR"
-  sed $OPTS "s/CA3_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME.$EXT
-
-  # If MacOSX, remove the temporary backup of the docker-compose file
-  if [ "$ARCH" == "Darwin" ]; then
-    rm docker-compose-e2e.yamlt
-  fi
-}
 function makeOrgYaml(){
   COUNT_NAME=$1
-  ORG_NAME=org$COUNT_NAME
-  MSP_NAME=Org$COUNT_NAME
+  ORG_NAME=${2:-"org$COUNT_NAME"}
+  MSP_NAME=${ORG_NAME^}
   COUNT_NAME=$(( $COUNT_NAME + 6))
   CURRENT_DIR=$PWD
   ARCH=$(uname -s | grep Darwin)
@@ -367,19 +227,20 @@ function makeOrgYaml(){
   else
     OPTS="-i"
   fi
-  LOCALHOST=${2:-"127.0.0.1:"}
+  LOCALHOST=${3:-"127.0.0.1:"}
 
-  cp docker-compose-org-sample.yaml docker-compose-org-$ORG_NAME.yaml
+  local FILENAME=docker-compose-deploy-$ORG_NAME.yaml
+  cp docker-compose-org-sample.yaml $FILENAME
 
   cd crypto-config/peerOrganizations/$ORG_NAME.example.com/ca/
   PRIV_KEY=$(ls *_sk)
   cd "$CURRENT_DIR"
 
-  sed $OPTS "s/CA_PRIVATE_KEY/${PRIV_KEY}/g" docker-compose-org-$ORG_NAME.yaml
-  sed $OPTS "s/COUNT_NAME/${COUNT_NAME}/g" docker-compose-org-$ORG_NAME.yaml
-  sed $OPTS "s/ORG_NAME/${ORG_NAME}/g" docker-compose-org-$ORG_NAME.yaml
-  sed $OPTS "s/MSP_NAME/${MSP_NAME}/g" docker-compose-org-$ORG_NAME.yaml
-  sed $OPTS "s/LOCALHOST/${LOCALHOST}/g" docker-compose-org-$ORG_NAME.yaml
+  sed $OPTS "s/CA_PRIVATE_KEY/${PRIV_KEY}/g" $FILENAME
+  sed $OPTS "s/COUNT_NAME/${COUNT_NAME}/g" $FILENAME
+  sed $OPTS "s/ORG_NAME/${ORG_NAME}/g" $FILENAME
+  sed $OPTS "s/MSP_NAME/${MSP_NAME}/g" $FILENAME
+  sed $OPTS "s/LOCALHOST/${LOCALHOST}/g" $FILENAME
 }
 function replaceUserPrivateKey() {
   # sed on MacOSX does not support -i flag with a null extension. We will use
@@ -632,12 +493,8 @@ if [ "$MODE" == "up" ]; then
   EXPMODE="Starting"
 elif [ "$MODE" == "down" ]; then
   EXPMODE="Stopping"
-elif [ "$MODE" == "restart" ]; then
-  EXPMODE="Restarting"
 elif [ "$MODE" == "generate" ]; then
   EXPMODE="Generating certs and genesis block"
-elif [ "$MODE" == "upgrade" ]; then
-  EXPMODE="Upgrading the network"
 elif [ "$MODE" == "test" ]; then
   EXPMODE="running test case"
 elif [ "$MODE" == "make" ]; then
@@ -647,35 +504,11 @@ else
   exit 1
 fi
 
-while getopts "h?c:t:d:f:s:l:i:o:v" opt; do
+while getopts "h?v" opt; do
   case "$opt" in
   h | \?)
     printHelp
     exit 0
-    ;;
-  c)
-    CHANNEL_NAME=$OPTARG
-    ;;
-  t)
-    CLI_TIMEOUT=$OPTARG
-    ;;
-  d)
-    CLI_DELAY=$OPTARG
-    ;;
-  f)
-    COMPOSE_FILE=$OPTARG
-    ;;
-  s)
-    IF_COUCHDB=$OPTARG
-    ;;
-  l)
-    LANGUAGE=$OPTARG
-    ;;
-  i)
-    IMAGETAG=$(go env GOARCH)"-"$OPTARG
-    ;;
-  o)
-    CONSENSUS_TYPE=$OPTARG
     ;;
   v)
     VERBOSE=true
@@ -684,17 +517,6 @@ while getopts "h?c:t:d:f:s:l:i:o:v" opt; do
 done
 
 
-# Announce what was requested
-
-if [ "${IF_COUCHDB}" == "couchdb" ]; then
-  echo
-  echo "${EXPMODE} for channel '${CHANNEL_NAME}' with CLI timeout of '${CLI_TIMEOUT}' seconds and CLI delay of '${CLI_DELAY}' seconds and using database '${IF_COUCHDB}'"
-else
-  echo "${EXPMODE} for channel '${CHANNEL_NAME}' with CLI timeout of '${CLI_TIMEOUT}' seconds and CLI delay of '${CLI_DELAY}' seconds"
-fi
-# ask for confirmation to proceed
-askProceed
-
 #Create the network using docker compose
 if [ "${MODE}" == "up" ]; then
   networkUp
@@ -702,14 +524,11 @@ elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   # generateCerts
-  replacePrivateKey docker-compose-ca yaml
+  makeOrgYaml 1 org1 0.0.0.0:
+  makeOrgYaml 2
+  makeOrgYaml 3 browser
   replaceUserPrivateKey "caliper/fabric" json
   generateChannelArtifacts
-elif [ "${MODE}" == "restart" ]; then ## Restart the network
-  networkDown
-  networkUp
-elif [ "${MODE}" == "upgrade" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
-  upgradeNetwork
 elif [ "${MODE}" == "test" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   testcases
 elif [ "${MODE}" == "make" ]; then ## Upgrade the network from version 1.2.x to 1.3.x

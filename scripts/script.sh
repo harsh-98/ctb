@@ -1,16 +1,6 @@
 #!/bin/bash
 # export FABRIC_CFG_PATH=${PWD}
 # export VERBOSE=false
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
-echo $FABRIC_CFG_PATH
 echo
 echo " ____    _____      _      ____    _____ "
 echo "/ ___|  |_   _|    / \    |  _ \  |_   _|"
@@ -104,7 +94,7 @@ instantiateChaincode 0 org1
 # Invoke chaincode on peer0.org1 and peer0.org2
 echo "Sending invoke transaction on peer0.org1 peer0.org2..."
 # adding the first certificate for domain.com
-sleep 4
+sleep 10
 chaincodeInvoke 0 org1 0 org2
 sleep 4
 chaincodeQuery 0 browser domain.com
