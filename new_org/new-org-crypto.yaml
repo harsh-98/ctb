@@ -1,0 +1,8 @@
+PeerOrgs:
+  - Name: MSP_NAME
+    Domain: ORG_NAME.example.com
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1

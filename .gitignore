@@ -21,7 +21,5 @@ caliper/fabric.json
 **/log/
 report-*.html
 
-
-/channel-artifacts/*.tx
-/channel-artifacts/*.block
-/channel-artifacts/*.json
+channel_config_server/**/
+**/channel-artifacts/*
