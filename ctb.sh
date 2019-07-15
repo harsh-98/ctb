@@ -392,34 +392,37 @@ if [ "$1" = "-m" ]; then # supports old usage, muscle memory is powerful!
 fi
 MODE=$1
 shift
-# Determine whether starting, stopping, restarting, generating or upgrading
-if [ "$MODE" == "up" ]; then
-  EXPMODE="Starting"
-elif [ "$MODE" == "down" ]; then
-  EXPMODE="Stopping"
-elif [ "$MODE" == "generate" ]; then
-  EXPMODE="Generating certs and genesis block"
-elif [ "$MODE" == "test" ]; then
-  EXPMODE="running test case"
-elif [ "$MODE" == "make" ]; then
-  EXPMODE="Convert sample org to deployable org"
-else
-  printHelp
-  exit 1
-fi
 
-while getopts "h?v" opt; do
+
+while getopts "h?n:v:d" opt; do
   case "$opt" in
   h | \?)
     printHelp
     exit 0
     ;;
-  v)
-    VERBOSE=true
+    n)  ORG_COUNT=$OPTARG
+    ;;
+    v)  VERSION=$OPTARG
+    ;;
+    d)  VERBOSE=true
     ;;
   esac
 done
 
+function submitOrg(){
+  docker exec cli scripts/sign-and-submit.sh $CHANNEL_NAME
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Test failed"
+    exit 1
+  fi
+}
+function installOnAll(){
+  docker exec cli scripts/step3-new-org.sh $CHANNEL_NAME $LANGUAGE $ORG_COUNT $VERSION
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Test failed"
+    exit 1
+  fi
+}
 
 #Create the network using docker compose
 if [ "${MODE}" == "up" ]; then
@@ -435,8 +438,12 @@ elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   generateChannelArtifacts
 elif [ "${MODE}" == "test" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   testcases
+elif [ "${MODE}" == "submit" ]; then
+  submitOrg
 elif [ "${MODE}" == "make" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   makeOrgYaml 1
+elif [ "${MODE}" == "install" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
+  installOnAll
 else
   printHelp
   exit 1
