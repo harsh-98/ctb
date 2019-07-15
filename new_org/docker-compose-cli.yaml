@@ -8,7 +8,7 @@ networks:
       name: net_byfn
 
 services:
-  cli:
+  cli-ORG_NAME:
     container_name: cli-ORG_NAME
     image: hyperledger/fabric-tools:$IMAGE_TAG
     tty: true
@@ -30,6 +30,7 @@ services:
     command: /bin/bash
     volumes:
         - /var/run/:/host/var/run/
+        - ../crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/orderers/orderer.example.com/msp/tlscacerts/tlsca.example.com-cert.pem
         - ../chaincode/:/opt/gopath/src/github.com/chaincode
         - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
         - ../scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/

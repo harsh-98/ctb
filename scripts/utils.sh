@@ -76,6 +76,66 @@ updateAnchorPeers() {
   echo
 }
 
+# queryCommitted VERSION PEER ORG
+queryCommitted() {
+  VERSION=$1
+  PEER=$2
+  ORG=$3
+  setGlobals $PEER $ORG
+  EXPECTED_RESULT="Version: ${VERSION}, Sequence: ${VERSION}, Endorsement Plugin: escc, Validation Plugin: vscc"
+  echo "===================== Querying chaincode definition on peer${PEER}.${ORG} on channel '$CHANNEL_NAME'... ===================== "
+  local rc=1
+  local starttime=$(date +%s)
+
+  # continue to poll
+  # we either get a successful response, or reach TIMEOUT
+  while
+    test "$(($(date +%s) - starttime))" -lt "$TIMEOUT" -a $rc -ne 0
+  do
+    sleep $DELAY
+    echo "Attempting to Query committed status on peer${PEER}.${ORG} ...$(($(date +%s) - starttime)) secs"
+    set -x
+    peer lifecycle chaincode querycommitted --channelID $CHANNEL_NAME --name mycc >&log.txt
+    res=$?
+    set +x
+    test $res -eq 0 && VALUE=$(cat log.txt | grep -o '^Version: [0-9], Sequence: [0-9], Endorsement Plugin: escc, Validation Plugin: vscc')
+    test "$VALUE" = "$EXPECTED_RESULT" && let rc=0
+  done
+  echo
+  cat log.txt
+  if test $rc -eq 0; then
+    echo "===================== Query chaincode definition successful on peer${PEER}.${ORG} on channel '$CHANNEL_NAME' ===================== "
+  else
+    echo "!!!!!!!!!!!!!!! Query chaincode definition result on peer${PEER}.${ORG} is INVALID !!!!!!!!!!!!!!!!"
+    echo "================== ERROR !!! FAILED to execute End-2-End Scenario =================="
+    echo
+    exit 1
+  fi
+}
+
+fetchChannelConfig() {
+  CHANNEL=$1
+  OUTPUT=$2
+
+  setOrdererGlobals
+
+  echo "Fetching the most recent configuration block for the channel"
+  if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
+    set -x
+    peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL --cafile $ORDERER_CA
+    set +x
+  else
+    set -x
+    peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL --tls --cafile $ORDERER_CA
+    set +x
+  fi
+
+  echo "Decoding config block to JSON and isolating config to ${OUTPUT}"
+  set -x
+  configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config >"${OUTPUT}"
+  set +x
+}
+
 ## Sometimes Join takes time hence RETRY at least 5 times
 joinChannelWithRetry() {
   PEER=$1
@@ -142,10 +202,12 @@ instantiateChaincode() {
 upgradeChaincode() {
   PEER=$1
   ORG=$2
+  VERSION=$3
+  ORG_COUNT=$4
   setGlobals $PEER $ORG
 
   set -x
-  peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 2.0 -c '{"Args":["init","a","90","b","210"]}' -P "AND ('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')"
+  echo peer chaincode upgrade -o orderer.example.com:7050 --tls $CORE_PEER_TLS_ENABLED --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v $VERSION -c '{"Args":[]}' -P `python scripts/get_policy.py $ORG_COUNT`
   res=$?
   set +x
   cat log.txt
@@ -200,30 +262,6 @@ queryHistory() {
   done
 }
 
-# fetchChannelConfig <channel_id> <output_json>
-# Writes the current channel config for a given channel to a JSON file
-fetchChannelConfig() {
-  CHANNEL=$1
-  OUTPUT=$2
-
-  setOrdererGlobals
-
-  echo "Fetching the most recent configuration block for the channel"
-  if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
-    set -x
-    peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL --cafile $ORDERER_CA
-    set +x
-  else
-    set -x
-    peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL --tls --cafile $ORDERER_CA
-    set +x
-  fi
-
-  echo "Decoding config block to JSON and isolating config to ${OUTPUT}"
-  set -x
-  configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config >"${OUTPUT}"
-  set +x
-}
 
 # signConfigtxAsPeerOrg <org> <configtx.pb>
 # Set the peerOrg admin of an org and signing the config update

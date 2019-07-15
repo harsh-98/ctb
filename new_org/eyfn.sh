@@ -56,28 +56,17 @@ function networkUp () {
 
   for i in `ls docker-compose-deploy-*yaml`
   do
-    IMAGE_TAG=$IMAGETAG docker-compose -f $i up -d 2>&1
+    IMAGE_TAG=$IMAGETAG docker-compose -f $i -p net up -d 2>&1
   done
 
   if [ $? -ne 0 ]; then
-    echo "ERROR !!!! Unable to start Org3 network"
+    echo "ERROR !!!! Unable to start $ORG_NAME network"
     exit 1
   fi
   echo
   echo "###############################################################"
   echo "############### Have New Org peers join network ##################"
   echo "###############################################################"
-  # docker exec Org3cli ./scripts/step2org3.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
-  # if [ $? -ne 0 ]; then
-  #   echo "ERROR !!!! Unable to have Org3 peers join network"
-  #   exit 1
-  # fi
-  # # finish by running the test
-  # docker exec Org3cli ./scripts/testorg3.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
-  # if [ $? -ne 0 ]; then
-  #   echo "ERROR !!!! Unable to run test"
-  #   exit 1
-  # fi
 }
 
 # Tear down running network
@@ -99,19 +88,6 @@ function networkDown () {
   fi
 }
 
-# Use the CLI container to create the configuration transaction needed to add
-# Org3 to the network
-function createConfigTx () {
-  echo
-  echo "###############################################################"
-  echo "####### Generate and submit config tx to add Org3 #############"
-  echo "###############################################################"
-  docker exec cli scripts/step1org3.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
-  if [ $? -ne 0 ]; then
-    echo "ERROR !!!! Unable to create config tx"
-    exit 1
-  fi
-}
 
 
 # Generate channel configuration transaction
@@ -124,10 +100,9 @@ function generateChannelArtifacts() {
   echo "##########################################################"
   echo "#########  Generating New Org config material ###############"
   echo "##########################################################"
-  mkdir -p channel-artifacts
   export FABRIC_CFG_PATH=$PWD
   set -x
-  configtxgen -printOrg ${MSP_NAME}MSP > channel-artifacts/org3.json
+  configtxgen -printOrg ${MSP_NAME}MSP > channel-artifacts/$ORG_NAME.json
   res=$?
   set +x
   if [ $res -ne 0 ]; then
@@ -173,47 +148,53 @@ if [ "$1" = "-m" ];then	# supports old usage, muscle memory is powerful!
 fi
 MODE=$1;shift
 # Determine whether starting, stopping, restarting or generating for announce
-if [ "$MODE" == "up" ]; then
-  EXPMODE="Starting"
-elif [ "$MODE" == "down" ]; then
-  EXPMODE="Stopping"
-elif [ "$MODE" == "restart" ]; then
-  EXPMODE="Restarting"
-elif [ "$MODE" == "clean" ]; then
-  EXPMODE="clean"
-elif [ "$MODE" == "generate" ]; then
-  EXPMODE="Generating certs and genesis block for"
-else
-  printHelp
-  exit 1
-fi
-while getopts "h?c:t:d:f:s:l:i:v" opt; do
+while getopts "h?n:v:d" opt; do
   case "$opt" in
     h|\?)
       printHelp
       exit 0
     ;;
-    c)  CHANNEL_NAME=$OPTARG
+    n)  ORG_NUM=$OPTARG
     ;;
-    t)  CLI_TIMEOUT=$OPTARG
+    v)  VERSION=$OPTARG
     ;;
-    d)  CLI_DELAY=$OPTARG
-    ;;
-    f)  COMPOSE_FILE=$OPTARG
-    ;;
-    s)  IF_COUCHDB=$OPTARG
-    ;;
-    l)  LANGUAGE=$OPTARG
-    ;;
-    i)  IMAGETAG=$OPTARG
-    ;;
-    v)  VERBOSE=true
+    d)  VERBOSE=true
     ;;
   esac
 done
 
+function createConfigTx() {
+  echo
+  echo "###############################################################"
+  echo "####### Generate and submit config tx to add $ORG_NAME #############"
+  echo "###############################################################"
+  docker exec cli-$ORG_NAME scripts/step1-new-org.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE $ORG_NAME
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Unable to create config tx"
+    exit 1
+  fi
+  docker cp cli-$ORG_NAME:/opt/gopath/src/github.com/hyperledger/fabric/peer/update_in_envelope.pb .
+}
+
+function installOnNewOrg() {
+  echo
+  echo "###############################################################"
+  echo "####### Generate and submit config tx to add $ORG_NAME #############"
+  echo "###############################################################"
+  docker exec cli-$ORG_NAME scripts/step2-new-org.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE $ORG_NUM $VERSION $MODE
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Unable to create config tx"
+    exit 1
+  fi
+}
+
 function rmYaml(){
-  rm -rf configtx.yaml crypto-config.yaml docker-compose-deploy-*.yaml channel-artifacts/* crypto-config/*
+  for i in `ls docker-compose-deploy-*yaml`
+  do
+    docker-compose -f $i -p net down --volumes --remove-orphans
+  done
+
+  rm -rf configtx.yaml crypto-config.yaml docker-compose-deploy-*.yaml channel-artifacts/*
 }
 
 function setConstant(){
@@ -265,24 +246,29 @@ function generateNewOrgYaml(){
   sed $OPTS "s/MSP_NAME/${MSP_NAME}/g" $FILENAME
 }
 
-askProceed
+setConstant $ORG_NUM
 #Create the network using docker compose
 if [ "${MODE}" == "up" ]; then
   networkUp
+  createConfigTx
 elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "clean" ]; then ## Clear the network
   rmYaml
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
-  setConstant 4
   generateNewOrgYaml
-  generateCerts "./crypto-config.yaml"
+  # generateCerts "./crypto-config.yaml"
   makeOrgYaml
   generateChannelArtifacts
-  # createConfigTx
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown
   networkUp
+elif [ "${MODE}" == "install" ]; then ## Restart the network
+  installOnNewOrg
+elif [ "${MODE}" == "upgrade" ]; then ## Restart the network
+  installOnNewOrg
+elif [ "${MODE}" == "test" ]; then ## Restart the network
+  createConfigTx
 else
   printHelp
   exit 1
