@@ -16,34 +16,19 @@ fi
 # Print the usage message
 function printHelp () {
   echo "Usage: "
-  echo "  eyfn.sh up|down|restart|generate [-c <channel name>] [-t <timeout>] [-d <delay>] [-f <docker-compose-file>] [-s <dbtype>]"
-  echo "  eyfn.sh -h|--help (print this message)"
+  echo "  eyfn.sh <mode> -v"
   echo "    <mode> - one of 'up', 'down', 'restart' or 'generate'"
   echo "      - 'up' - bring up the network with docker-compose up"
   echo "      - 'down' - clear the network with docker-compose down"
   echo "      - 'restart' - restart the network"
   echo "      - 'generate' - generate required certificates and genesis block"
-  echo "    -c <channel name> - channel name to use (defaults to \"mychannel\")"
-  echo "    -t <timeout> - CLI timeout duration in seconds (defaults to 10)"
-  echo "    -d <delay> - delay duration in seconds (defaults to 3)"
-  echo "    -f <docker-compose-file> - specify which docker-compose file use (defaults to docker-compose-cli.yaml)"
-  echo "    -s <dbtype> - the database backend to use: goleveldb (default) or couchdb"
-  echo "    -l <language> - the chaincode language: golang (default) or node"
-  echo "    -i <imagetag> - the tag to be used to launch the network (defaults to \"latest\")"
-  echo "    -v - verbose mode"
+  echo "      - 'join' - generate required certificates and genesis block"
+  echo "      - 'install' - generate required certificates and genesis block"
   echo
-  echo "Typically, one would first generate the required certificates and "
-  echo "genesis block, then bring up the network. e.g.:"
-  echo
-  echo "	eyfn.sh generate -c mychannel"
-  echo "	eyfn.sh up -c mychannel -s couchdb"
-  echo "	eyfn.sh up -l node"
-  echo "	eyfn.sh down -c mychannel"
-  echo
-  echo "Taking all defaults:"
-  echo "	eyfn.sh generate"
-  echo "	eyfn.sh up"
-  echo "	eyfn.sh down"
+  echo "    -h - (print this message)"
+  echo "    -n <number of orgs> - number of orgs after upgrading network"
+  echo "    -v - version of chaincode to use"
+  echo "    -d - verbose or not"
 }
 
 . ../scripts/common-utils.sh
@@ -114,13 +99,6 @@ function generateChannelArtifacts() {
 }
 
 
-# If BYFN wasn't run abort
-if [ ! -d crypto-config ]; then
-  echo
-  echo "ERROR: Please, run byfn.sh first."
-  echo
-  exit 1
-fi
 
 # Obtain the OS and Architecture string that will be used to select the correct
 # native binaries for your platform
@@ -191,7 +169,7 @@ function installOnNewOrg() {
 function rmYaml(){
   for i in `ls docker-compose-deploy-*yaml`
   do
-    docker-compose -f $i -p net down --volumes --remove-orphans
+    docker-compose -f $i -p net down --volumes
   done
 
   rm -rf configtx.yaml crypto-config.yaml docker-compose-deploy-*.yaml channel-artifacts/*
@@ -263,9 +241,9 @@ elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
 elif [ "${MODE}" == "restart" ]; then ## Restart the network
   networkDown
   networkUp
-elif [ "${MODE}" == "install" ]; then ## Restart the network
+elif [ "${MODE}" == "join" ]; then ## Restart the network
   installOnNewOrg
-elif [ "${MODE}" == "upgrade" ]; then ## Restart the network
+elif [ "${MODE}" == "install" ]; then ## Restart the network
   installOnNewOrg
 elif [ "${MODE}" == "test" ]; then ## Restart the network
   createConfigTx

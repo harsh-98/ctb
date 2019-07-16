@@ -64,12 +64,12 @@
                     "cert": "ROOTPATH/crypto-config/peerOrganizations/browser.example.com/users/Admin@browser.example.com/msp/signcerts/Admin@browser.example.com-cert.pem"
                 },
                 "ca": {
-                    "url": "http://localhost:9054",
+                    "url": "http://localhost:6054",
                     "name": "ca.browser.example.com"
                 },
                 "peer1": {
-                    "requests": "grpcs://localhost:9051",
-                    "events": "grpcs://localhost:9051",
+                    "requests": "grpcs://localhost:6051",
+                    "events": "grpcs://localhost:6051",
                     "server-hostname": "peer0.browser.example.com",
                     "tls_cacerts": "ROOTPATH/crypto-config/peerOrganizations/browser.example.com/peers/peer0.browser.example.com/tls/ca.crt"
                 }

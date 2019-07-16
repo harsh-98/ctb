@@ -22,7 +22,7 @@ CC_SRC_PATH="github.com/chaincode/ctb"
 # import utils
 . scripts/utils.sh
 
-if [ $OPERATION == "install" ]
+if [ $OPERATION == "join" ]
 then
         echo "Fetching channel config block from orderer..."
         set -x
@@ -32,7 +32,9 @@ then
         set +x
         cat log.txt
         verifyResult $res "Fetching config block from orderer has Failed"
-        # joinChannelWithRetry 0 $ORG_NAME
+        joinChannelWithRetry 0 $ORG_NAME
+elif [ $OPERATION == "install" ]
+then
         echo "===================== peer0.$ORG_NAME joined channel '$CHANNEL_NAME' ===================== "
         echo "Installing chaincode on peer0.$ORG_NAME"
         installChaincode 0 $ORG_NAME $VERSION

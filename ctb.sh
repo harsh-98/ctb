@@ -11,16 +11,17 @@ function printHelp() {
   echo "      - 'up' - bring up the network with docker-compose up"
   echo "      - 'generate' - generate required certificates and genesis block"
   echo "      - 'down' - clear the network with docker-compose down"
+  echo "      - 'submit' - sign and submit the up`update_in_envelope.pb`"
+  echo "      - 'install' - install newer chaincode on all the peers in current network"
   echo "      - 'test' - create channel and instantiate ctb chaincode"
   echo "      - 'make'  - generate org docker-compose file"
-  echo "  ctb.sh -h (print this message)"
+  echo "      - 'upgrade' - upgrade the chaincode"
   echo
-  echo "Operations: "
-  echo "	ctb.sh generate"
-  echo "	ctb.sh up"
-  echo "	ctb.sh down"
-  echo "	ctb.sh test"
-  echo "	ctb.sh make"
+  echo "    -h - (print this message)"
+  echo "    -n <number of orgs> - number of orgs after upgrading network"
+  echo "    -v - version of chaincode to use"
+  echo "    -d - verbose or not"
+
 }
 
 . scripts/common-utils.sh
@@ -417,7 +418,7 @@ function submitOrg(){
   fi
 }
 function installOnAll(){
-  docker exec cli scripts/step3-new-org.sh $CHANNEL_NAME $LANGUAGE $ORG_COUNT $VERSION
+  docker exec cli scripts/step3-new-org.sh $CHANNEL_NAME $LANGUAGE $ORG_COUNT $VERSION $MODE
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Test failed"
     exit 1
@@ -433,7 +434,7 @@ elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   # generateCerts "./crypto-config.yaml"
   makeOrgYaml 1 org1 0.0.0.0:
   makeOrgYaml 2
-  makeOrgYaml 3 browser
+  makeOrgYaml 0 browser
   replaceUserPrivateKey "caliper/fabric" json
   generateChannelArtifacts
 elif [ "${MODE}" == "test" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
@@ -442,6 +443,8 @@ elif [ "${MODE}" == "submit" ]; then
   submitOrg
 elif [ "${MODE}" == "make" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   makeOrgYaml 1
+elif [ "${MODE}" == "upgrade" ]; then ## Restart the network
+  installOnAll
 elif [ "${MODE}" == "install" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   installOnAll
 else
