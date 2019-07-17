@@ -2,12 +2,12 @@
 
 We need to generate the crypto material and docker-compose specific to the org we want to deploy.
 ```
-./ctb.sh generate <<< "Y"
+./eyfn.sh generate -n 3 <<< "Y"
 ```
 
 Below command brings the container up and also generate the difference between the config of channel vs modified config of channel. This `diff` is stored in `update_in_envelope.pb`.
 ```
-./ctb.sh up  <<< "Y"
+./eyfn.sh up -n 3 <<< "Y"
 ```
 
 Then `update_in_envelope.pb` needs to be signed by majority of the orgs present in channel. Information relating how many signatures are needed is present under channel section in configtx.yaml.

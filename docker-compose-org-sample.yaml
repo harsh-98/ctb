@@ -63,7 +63,7 @@ services:
         - ./crypto-config/peerOrganizations/ORG_NAME.example.com/peers/peer0.ORG_NAME.example.com/tls:/etc/hyperledger/fabric/tls
         - peer0.ORG_NAME.example.com:/var/hyperledger/production
     ports:
-      - 127.0.0.1:COUNT_NAME051:7051
+      - COUNT_NAME051:7051
     depends_on:
       - couchdb.peer0.ORG_NAME.example.com
     networks:
