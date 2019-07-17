@@ -1,0 +1,21 @@
+{
+    "apps": [
+      {
+        "name": "report",
+        "script": "http-server",
+        "args" : "-p 4000 ../reports"
+      },
+      {
+        "name": "CA server",
+        "script": "babel-node",
+        "args": "server.js",
+        "cwd" : "./server"
+      },
+      {
+        "name": "Config API",
+        "script": "http-server",
+        "cwd": "./channel_config_server/",
+        "args": "-p 5000 serve"
+      }
+    ]
+  }
