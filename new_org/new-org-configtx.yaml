@@ -24,7 +24,7 @@ Organizations:
         MSPDir: crypto-config/peerOrganizations/ORG_NAME.example.com/msp
 
         AnchorPeers:
-            - Host: peer0.ORG_NAME.example.com
+            - Host: ORG_IP_ADDR
               Port: COUNT_NAME051
 
         Policies:

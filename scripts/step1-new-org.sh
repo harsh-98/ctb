@@ -34,7 +34,7 @@ echo "========= Creating config transaction to add org3 to network =========== "
 echo
 
 # Fetch the config for the channel, writing it to config.json
-wget 10.38.2.113:5000/config.json
+wget $ORDERER_IP:5000/config.json
 # Modify the configuration to append the new org
 set -x
 jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"'${ORG_NAME^}'MSP":.[1]}}}}}' config.json ./channel-artifacts/$ORG_NAME.json > modified_config.json

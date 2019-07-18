@@ -1,0 +1,29 @@
+[req]
+distinguished_name = req_distinguished_name
+req_extensions = v3_req
+
+[req_distinguished_name]
+countryName = Country Name (2 letter code)
+countryName_default = US
+stateOrProvinceName = State or Province Name (full name)
+stateOrProvinceName_default = California
+localityName = Locality Name (eg, city)
+localityName_default = San Francisco
+organizationalUnitName	= Organizational Unit Name (eg, section)
+organizationalUnitName_default	= example.com
+commonName = tlsca.example.com
+commonName_max	= 64
+
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = digitalSignature, keyEncipherment
+extendedKeyUsage = clientAuth, serverAuth
+subjectAltName = @alt_names
+subjectKeyIdentifier=hash
+
+
+[alt_names]
+IP = 10.38.2.113
+DNS = orderer.example.com
+DNS.1 = orderer
+

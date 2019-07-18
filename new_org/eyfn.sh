@@ -32,6 +32,7 @@ function printHelp () {
 }
 
 . ../scripts/common-utils.sh
+. .env
 
 
 
@@ -213,6 +214,7 @@ function generateNewOrgYaml(){
 
   local FILENAME=configtx.yaml
   cp new-org-configtx.yaml $FILENAME
+  sed $OPTS "s/ORG_IP_ADDR/${ORG_IP}/g" $FILENAME
   sed $OPTS "s/COUNT_NAME/${COUNT_NAME}/g" $FILENAME
   sed $OPTS "s/ORG_NAME/${ORG_NAME}/g" $FILENAME
   sed $OPTS "s/MSP_NAME/${MSP_NAME}/g" $FILENAME
@@ -220,6 +222,7 @@ function generateNewOrgYaml(){
   local FILENAME=docker-compose-deploy-cli.yaml
   cp docker-compose-cli.yaml $FILENAME
   sed $OPTS "s/COUNT_NAME/${COUNT_NAME}/g" $FILENAME
+  sed $OPTS "s/ORDERER_IP_ADDR/${ORDERER_IP}/g" $FILENAME
   sed $OPTS "s/ORG_NAME/${ORG_NAME}/g" $FILENAME
   sed $OPTS "s/MSP_NAME/${MSP_NAME}/g" $FILENAME
 }

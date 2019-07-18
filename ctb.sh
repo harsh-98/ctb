@@ -431,7 +431,7 @@ if [ "${MODE}" == "up" ]; then
 elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
-  # generateCerts "./crypto-config.yaml"
+#   generateCerts "./crypto-config.yaml"
   makeOrgYaml 1 org1 0.0.0.0:
   makeOrgYaml 2
   makeOrgYaml 0 browser
