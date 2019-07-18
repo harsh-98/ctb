@@ -13,6 +13,7 @@ function printHelp() {
   echo "    -t <TO_IP> - version of chaincode to use"
   echo "    -p <FILE_PATH> - path of the file to transfer to TO_IP"
   echo "    -l <ARRAY>- array of peers tlscert to transfer from FROM_IP to TO_IP"
+  echo "    -d <TO_PATH>- path on the receiving endpoint"
 
 }
 
@@ -38,14 +39,14 @@ function pushCert(){
 }
 
 function sendConnectJson(){
-    rsync -avzhe  ssh --progress $1 ctb@$TO_IP:/home/ctb/ctb/server/ctb/connect.json
+    rsync -avzhe  ssh --progress $1 ctb@$TO_IP:$TO_PATH
 
 }
 
 MODE=$1
 shift
 
-while getopts "h?f:t:p:l:" opt; do
+while getopts "h?f:t:p:l:d:" opt; do
   case "$opt" in
   h | \?)
     printHelp
@@ -56,6 +57,8 @@ while getopts "h?f:t:p:l:" opt; do
     t)  TO_IP=$OPTARG
     ;;
     p)  FILE_PATH=$OPTARG
+    ;;
+    d)  TO_PATH=$OPTARG
     ;;
     l)  ARRAY=$OPTARG
     ;;

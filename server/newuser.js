@@ -26,7 +26,7 @@ async function main() {
         // Check to see if we've already enrolled the user.
         const userExists = await wallet.exists(username);
         if (userExists) {
-            console.log('An identity for the user username already exists in the wallet');
+            console.log(`An identity for the user ${username} already exists in the wallet`);
             return;
         }
 
@@ -46,12 +46,19 @@ async function main() {
         const ca = gateway.getClient().getCertificateAuthority();
         const adminIdentity = gateway.getCurrentIdentity();
 
+        let affiliation = `${orgName}.department1`
+        const affiliationService = ca.newAffiliationService();
+        const registeredAffiliations = await affiliationService.getAll(adminIdentity);
+        if(!registeredAffiliations.result.affiliations.some(x => x.name == orgName)){
+            console.log('Register the new affiliation: %s ', affiliation);
+            await affiliationService.create({name: affiliation, force: true}, adminIdentity);
+        }
         // Register the user, enroll the user, and import the new identity into the wallet.
-        const secret = await ca.register({ affiliation: `${orgName}.department1`, enrollmentID: username, role: 'client' }, adminIdentity);
+        const secret = await ca.register({ affiliation, enrollmentID: username, role: 'client' }, adminIdentity);
         const enrollment = await ca.enroll({ enrollmentID: username, enrollmentSecret: secret });
         const userIdentity = X509WalletMixin.createIdentity(`${orgNameCap}MSP`, enrollment.certificate, enrollment.key.toBytes());
         wallet.import(username, userIdentity);
-        console.log('Successfully registered and enrolled admin user username and imported it into the wallet');
+        console.log(`Successfully registered and enrolled ${username} and imported it into the wallet`);
 
     } catch (error) {
         console.error(`Failed to register user username: ${error}`);
