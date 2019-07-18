@@ -16,7 +16,8 @@ const ccp = JSON.parse(ccpJSON);
 
 async function main() {
     try {
-
+        let orgName = process.argv[2];
+        let orgNameCap = orgName.charAt(0).toUpperCase() + orgName.slice(1);
         // Create a new CA client for interacting with the CA.
         const caURL = ccp.certificateAuthorities['ca.org1.example.com'].url;
         const ca = new FabricCAServices(caURL);
@@ -34,8 +35,8 @@ async function main() {
         }
 
         // Enroll the admin user, and import the new identity into the wallet.
-        const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
-        const identity = X509WalletMixin.createIdentity('Org1MSP', enrollment.certificate, enrollment.key.toBytes());
+        const enrollment = await ca.enroll({ enrollmentID: process.env.MSP_USERNAME, enrollmentSecret: process.env.MSP_PASSWORD });
+        const identity = X509WalletMixin.createIdentity(`${orgNameCap}MSP`, enrollment.certificate, enrollment.key.toBytes());
         wallet.import('admin', identity);
         console.log('Successfully enrolled admin user "admin" and imported it into the wallet');
 

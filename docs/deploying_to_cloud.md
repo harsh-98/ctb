@@ -8,10 +8,17 @@ RAM: 4GB
 CPU: Intel(R) Xeon(R) CPU E5-2650 v4 @ 2.20GHz
 ```
 
+
 ## Setup
 
 __NOTE__: Using tmux is recommended because we need multiple terminals for running many processes and also for configuring different services. And I am assuming that all repos are cloned in home directory.
 
+__REQUIRED SOFTWARE__: `make g++ node babel-node pm2`
+For installing node.js, refer [gist](https://gist.github.com/d2s/372b5943bce17b964a79)
+```
+sudo apt-get install g++ make
+npm install -g babel-cli pm2 nodemon
+```
 
 ### Installing docker and adding user to docker group
 ```

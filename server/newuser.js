@@ -16,6 +16,8 @@ const ccp = JSON.parse(ccpJSON);
 async function main() {
     try {
         let username = process.argv[2];
+        let orgName = process.argv[3];
+        let orgNameCap = orgName.charAt(0).toUpperCase() + orgName.slice(1);
         // Create a new file system based wallet for managing identities.
         const walletPath = path.join(process.cwd(), 'wallet');
         const wallet = new FileSystemWallet(walletPath);
@@ -45,9 +47,9 @@ async function main() {
         const adminIdentity = gateway.getCurrentIdentity();
 
         // Register the user, enroll the user, and import the new identity into the wallet.
-        const secret = await ca.register({ affiliation: 'org1.department1', enrollmentID: username, role: 'client' }, adminIdentity);
+        const secret = await ca.register({ affiliation: `${orgName}.department1`, enrollmentID: username, role: 'client' }, adminIdentity);
         const enrollment = await ca.enroll({ enrollmentID: username, enrollmentSecret: secret });
-        const userIdentity = X509WalletMixin.createIdentity('Org1MSP', enrollment.certificate, enrollment.key.toBytes());
+        const userIdentity = X509WalletMixin.createIdentity(`${orgNameCap}MSP`, enrollment.certificate, enrollment.key.toBytes());
         wallet.import(username, userIdentity);
         console.log('Successfully registered and enrolled admin user username and imported it into the wallet');
 
