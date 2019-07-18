@@ -35,7 +35,7 @@ services:
       - COUCHDB_USER=couch
       - COUCHDB_PASSWORD=couchpw
     ports:
-      - LOCALHOSTCOUNT_NAME984:5984
+      - COUNT_NAME984:5984
     networks:
       - outside
 

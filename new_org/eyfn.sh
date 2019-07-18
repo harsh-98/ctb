@@ -239,6 +239,7 @@ elif [ "${MODE}" == "clean" ]; then ## Clear the network
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   generateNewOrgYaml
   # generateCerts "./crypto-config.yaml"
+  patchOrdererAndOrgs ../base/ext.cnf
   makeOrgYaml
   generateChannelArtifacts
 elif [ "${MODE}" == "restart" ]; then ## Restart the network

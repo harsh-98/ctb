@@ -23,7 +23,3 @@ subjectKeyIdentifier=hash
 
 
 [alt_names]
-IP = 10.38.2.113
-DNS = orderer.example.com
-DNS.1 = orderer
-

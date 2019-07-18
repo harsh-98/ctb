@@ -25,9 +25,14 @@ function printHelp() {
 }
 
 . scripts/common-utils.sh
+. .env
 
-
-
+  ARCH=$(uname -s | grep Darwin)
+  if [ "$ARCH" == "Darwin" ]; then
+    OPTS="-it"
+  else
+    OPTS="-i"
+  fi
 
 
 # Generate the needed certificates, the genesis block and start the network.
@@ -167,12 +172,6 @@ function replaceUserPrivateKey() {
   # 't' for our back-up's extension and delete it at the end of the function
   FILENAME=$1
   EXT=$2
-  ARCH=$(uname -s | grep Darwin)
-  if [ "$ARCH" == "Darwin" ]; then
-    OPTS="-it"
-  else
-    OPTS="-i"
-  fi
 
   # Copy the template to the file that will be modified to add the private key
   cp $FILENAME-sample.$EXT $FILENAME.$EXT
@@ -214,12 +213,6 @@ function makeOrgYaml(){
   MSP_NAME=${ORG_NAME^}
   COUNT_NAME=$(( $COUNT_NAME + 6))
   local CURRENT_DIR=$PWD
-  ARCH=$(uname -s | grep Darwin)
-  if [ "$ARCH" == "Darwin" ]; then
-    OPTS="-it"
-  else
-    OPTS="-i"
-  fi
   LOCALHOST=${3:-"127.0.0.1:"}
 
   local FILENAME=docker-compose-deploy-$ORG_NAME.yaml
@@ -234,6 +227,12 @@ function makeOrgYaml(){
   sed $OPTS "s/ORG_NAME/${ORG_NAME}/g" $FILENAME
   sed $OPTS "s/MSP_NAME/${MSP_NAME}/g" $FILENAME
   sed $OPTS "s/LOCALHOST/${LOCALHOST}/g" $FILENAME
+
+}
+
+function addIPtoConfigtx(){
+  cp template-configtx.yaml configtx.yaml
+  sed $OPTS "s/ORG_IP_ADDR/${ORG_IP}/g" configtx.yaml
 }
 
 # The `configtxgen tool is used to create four artifacts: orderer **bootstrap
@@ -431,7 +430,9 @@ if [ "${MODE}" == "up" ]; then
 elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
-#   generateCerts "./crypto-config.yaml"
+  # generateCerts "./crypto-config.yaml"
+  addIPtoConfigtx
+  patchOrdererAndOrgs base/ext.cnf
   makeOrgYaml 1 org1 0.0.0.0:
   makeOrgYaml 2
   makeOrgYaml 0 browser

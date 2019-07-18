@@ -44,7 +44,8 @@ Organizations:
                 Type: Signature
                 Rule: "OR('Org1MSP.admin')"
         AnchorPeers:
-            - Host: peer0.org1.example.com
+            - Host: ORG_IP_ADDR
+            # - Host: peer0.org1.example.com
               Port: 7051
 
     - &Org2
@@ -62,7 +63,8 @@ Organizations:
                 Type: Signature
                 Rule: "OR('Org2MSP.admin')"
         AnchorPeers:
-            - Host: peer0.org2.example.com
+            - Host: ORG_IP_ADDR
+            # - Host: peer0.org2.example.com
               Port: 7051
 
     - &Browser
@@ -80,7 +82,8 @@ Organizations:
                 Type: Signature
                 Rule: "OR('BrowserMSP.admin')"
         AnchorPeers:
-            - Host: peer0.browser.example.com
+            - Host: ORG_IP_ADDR
+            # - Host: peer0.browser.example.com
               Port: 7051
 
 Capabilities:
@@ -117,7 +120,8 @@ Orderer: &OrdererDefaults
     OrdererType: solo
 
     Addresses:
-        - orderer.example.com:7050
+        # - orderer.example.com:7050
+        - ORG_IP_ADDR:7050
 
     BatchTimeout: 4s
 
