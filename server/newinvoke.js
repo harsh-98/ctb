@@ -7,8 +7,9 @@
 const { FileSystemWallet, Gateway } = require('fabric-network');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config()
 
-const ccpPath = path.resolve(__dirname, 'connect.json');
+const ccpPath = path.resolve(__dirname, process.env.CONNECT_JSON);
 const ccpJSON = fs.readFileSync(ccpPath, 'utf8');
 const ccp = JSON.parse(ccpJSON);
 

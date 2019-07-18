@@ -20,7 +20,7 @@ crypto-config
 caliper/fabric.json
 **/log/
 report-*.html
-tlsca.example.com-cert.pem
+*cert.pem
 **/configtx.yaml
 **/update_in_envelope.pb
 
