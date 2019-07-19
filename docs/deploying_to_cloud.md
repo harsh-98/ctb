@@ -84,3 +84,11 @@ After going through the setup procedure, we have following running and accessibl
 - A couchDb connected to one of the peers. `<ip-addr>:5984`
 - The explorer interface for monitoring the network. `<ip-addr>:3000`
 - The CA server for adding, revoking and querying the certificates. `<ip-addr>:8000`
+
+## Start pm2 service
+This starts report server for viewing caliper generated reports at `:4000`, CA server at `:8000` and channel config api at `:5000`.
+```
+pm2 start pm2.json
+```
+
+__NOTE__: If you followed [Starting a CA](#starting-a-ca) section, you will get error for `pm2 start pm2.json at 4000 port` with error code `EADDRINUSE`.

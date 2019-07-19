@@ -25,6 +25,8 @@ __NOTE__: One important point to remember is private/public key pair used by fab
 - For adding subjectKeyIdentifier to certificate refer first answer on https://stackoverflow.com/questions/21179132/create-self-signed-certificate-with-subject-key-identifier
 - For including `X509v3 extensions` in certificate refer first answer https://security.stackexchange.com/questions/150078/missing-x509-extensions-with-an-openssl-generated-certificate
 - CryptoGen Binary for Fabric 1.4 https://hyperledger-fabric.readthedocs.io/en/release-1.4/commands/cryptogen.html
+- Crypto-config Demystified [here](understanding_crypto_config.md)
+
 
 After reading this, you can go through [adding CA server](new_org_CA_server.md)
 

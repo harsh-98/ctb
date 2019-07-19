@@ -75,7 +75,7 @@ Peers: (each org has one CA, one peer with couchDB)
 - org3.example.com
 ```
 
-## Reference
+## References
 - [Code of fabric-sample for fabric 1.4](https://github.com/hyperledger/fabric-samples/tree/release-1.4/)
 
 After reading this, you can go through [adding IP SANs to orderers' and peers' certs](add_ip_sans.md)
