@@ -30,3 +30,4 @@ node ./scripts/npm_serve # on terminal 2
 - https://medium.com/tallyx/adapting-hyperledger-caliper-to-custom-hyperledger-fabric-networks-3ffa650215a0
 - https://hyperledger.github.io/caliper/docs/1_Getting_Started.html
 - https://github.com/hyperledger/caliper/
+- https://hyperledger.github.io/caliper/docs/Fabric_Configuration.html

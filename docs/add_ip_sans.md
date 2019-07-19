@@ -26,4 +26,5 @@ __NOTE__: One important point to remember is private/public key pair used by fab
 - For including `X509v3 extensions` in certificate refer first answer https://security.stackexchange.com/questions/150078/missing-x509-extensions-with-an-openssl-generated-certificate
 - CryptoGen Binary for Fabric 1.4 https://hyperledger-fabric.readthedocs.io/en/release-1.4/commands/cryptogen.html
 
+After reading this, you can go through [adding CA server](new_org_CA_server.md)
 
