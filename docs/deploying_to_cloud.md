@@ -17,7 +17,7 @@ __REQUIRED SOFTWARE__: `make g++ node babel-node pm2`
 For installing node.js, refer [gist](https://gist.github.com/d2s/372b5943bce17b964a79)
 ```
 sudo apt-get install g++ make
-npm install -g babel-cli pm2 nodemon
+npm install -g babel-cli pm2 nodemon http-server
 ```
 
 ### Installing docker and adding user to docker group

@@ -8,7 +8,6 @@ var options = {
     key: fs.readFileSync(args[0]),
     cert: fs.readFileSync(args[1]),
     // ca: fs.readFileSync(args[2]),
-    rejectUnauthorized: true,
 };
 
 // const server = tls.createServer(options, (socket) => {

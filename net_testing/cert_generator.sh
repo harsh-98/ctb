@@ -1,15 +1,12 @@
+#!/bin/bash
+
 SUCCESSCOUNT=0
 LOCK=0
-SUBDOMAIN=$1
-DOMAINCOUNT=$2
-ISSUECOUNT=$3
-
 
 create_ca(){
     echo "##########################################################"
     echo "Generating certificate for $CA"
     echo "##########################################################"
-    CA=$1
     mkdir $CA
     cd $CA
     openssl req \
@@ -130,7 +127,6 @@ clean() {
 }
 
 test_domain() {
-    DOMAIN=$SUBDOMAIN$i.example.com
     CA=$2
     issue_cert $DOMAIN $CA
     push_cert $DOMAIN $CA
@@ -149,13 +145,56 @@ test_domain() {
     fi
 }
 
+while getopts "h?c:d:n:i:or" opt; do
+  case "$opt" in
+  h | \?)
+    printHelp
+    exit 0
+    ;;
+    c) CA=$OPTARG
+    ;;
+    d)  URL=$OPTARG
+    ;;
+    n)  DOMAINCOUNT=$OPTARG
+    ;;
+    i)  ISSUECOUNT=$OPTARG
+    ;;
+    o)  ONLY_DOMAINS=true
+    ;;
+    r)  REMOVE_ALL=true
+    ;;
+  esac
+done
+
+function get_domain(){
+    IFS='.' read -ra DOMAIN_A <<< $URL
+    SUB="${DOMAIN_A[0]}$1"
+    ROOT=$(printf ".%s" "${DOMAIN_A[@]:1:2}")
+    echo "$SUB$ROOT"
+}
 
 main() {
-    clean
-    CA=$SUBDOMAIN.example.com
-    create_ca $CA
+    if [ $REMOVE_ALL -a ! $ONLY_DOMAINS ]
+    then
+        mv $CA ..
+        clean
+        mv ../$CA .
+    fi
+
+    if [ $REMOVE_ALL ]
+    then
+        clean
+    fi
+
+    if [ ! $ONLY_DOMAINS ]
+    then
+        create_ca $CA
+    fi
+
     for i in $(seq 1 $DOMAINCOUNT)
         do
+            DOMAIN=$(get_domain $i)
+            echo $DOMAIN
             test_domain $i $CA $ISSUECOUNT
             # test_domain $i $CA $ISSUECOUNT  &
         done

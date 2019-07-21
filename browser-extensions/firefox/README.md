@@ -42,3 +42,14 @@ yarn build
 Both commands will create a `dist/` directory, it will contain the built files that should be loaded into the browser or packed.
 
 For instructions on how to load an unpacked extension, refer [this](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Temporary_Installation_in_Firefox).
+
+
+## Testing
+
+After loading the temporary extension, you can go to google.com or some other site. And get a notification that the certificate for this site is not available in the HLCTB.
+
+#### For ctb-testing.ml
+
+I have added the certificate for domain.com to HLCTB network. So, for checking ctb-testing.ml certificate, you have to add `ctb/scripts/certs/ca/ca.crt` to trust certificate in you browser.
+
+I am running a sample server for `ctb-testing.ml` on `139.59.22.55`. Try opening https://ctb-testing.ml:4000
