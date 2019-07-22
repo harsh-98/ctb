@@ -2,6 +2,8 @@
 
 This is based on paper [Certificate Transparency Using Blockchain](https://eprint.iacr.org/2018/1232).
 
+![Architecture of HLCTB network](assets/architecture.png)
+
 ## Generate crypto-config and transactions
 ```
 ./ctb.sh generate

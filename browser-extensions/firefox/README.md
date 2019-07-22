@@ -7,18 +7,23 @@ This extension queries the HLCTB network hosted on digitalocean and checks wheth
 #### Possible responses
 
 - When the certificate of domain matches the certificate present on HLCTB
+
 `Valid certificate: present on ctb network ${domain}`
 
 - When the certificate has been present for domain
+
 `Certificate has been revoked ${domain}`
 
 - WHen a new certificate has been issued for domain
+
 `Invalid cert for ${domain}`
 
 - When HLCTB doesn't have any certificate for domain
+
 `Entry not available for ${domain}`
 
 - When response from server doesn't match any of the above cases
+
 `Problem with Server for ${domain}: ${this.response} ${this.readyState}`
 
 ## Installation
