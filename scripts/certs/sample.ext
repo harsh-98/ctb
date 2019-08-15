@@ -1,7 +1,28 @@
+[req]
+req_extensions = v3_req
+
+[ v3_req ]
 authorityKeyIdentifier=keyid,issuer
 basicConstraints=CA:FALSE
 keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
 subjectAltName = @alt_names
+authorityInfoAccess     = @ocsp_info
+#crlDistributionPoints   = @crl_info
 
 [alt_names]
 DNS.1 = domain.com
+
+
+[ crl_ext ]
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+
+[ ocsp_info ]
+caIssuers;URI.0         = http://localhost:7000/ca.crt
+OCSP;URI.0              = http://localhost:7000
+
+[ issuer_info ]
+caIssuers;URI.0         = localhost:7000/ca.crt
+
+[ crl_info ]
+URI.0                   = localhost:8000/ca.crl
