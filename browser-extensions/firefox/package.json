@@ -1,9 +1,9 @@
 {
-    "name": "chrome-extension-template",
-    "version": "0.0.9",
-    "description": "Chrome extension boilerplate, replace all values!",
+    "name": "hfctb",
+    "version": "0.0.1",
+    "description": "For checking the status of certificate in HFCTB network",
     "main": "src/index.js",
-    "repository": "git@github.com:edrpls/chrome-extension-template.git",
+    "repository": "git@github.com:harsh-98/ctb.git",
     "license": "MIT",
     "devDependencies": {
         "babel-cli": "^6.26.0",
