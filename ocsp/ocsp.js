@@ -13,6 +13,8 @@ var options = {
 
 var server = ocsp.Server.create(options);
 
+// serial number of domain.com certificate
+// check by `openssl x509 -noout -text -in ./ctb/scripts/certs/domain.crt`
 server.addCert("13ee62ce1c5734fde83ecab5aa35fd64a32fa5ab", 'good');
 // server.addCert("13ee62ce1c5734fde83ecab5aa35fd64a32fa5ab", 'revoked', {
 //   revocationTime: new Date(),

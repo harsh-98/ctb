@@ -9,7 +9,7 @@ var a = new ocsp.Agent();
 
 var req = https.get({
   host: 'domain.com',
-  port: 7000,
+  port: 4040,
   agent: a,
   ca: ca
 }, function (res) {
