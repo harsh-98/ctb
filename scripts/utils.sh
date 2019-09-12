@@ -174,9 +174,6 @@ installChaincode() {
 }
 
 instantiateChaincode() {
-  PEER=$1
-  ORG=$2
-  setGlobals $PEER $ORG
   VERSION=${3:-1.0}
 
   # while 'peer chaincode' command can get the orderer endpoint from the peer
@@ -194,8 +191,8 @@ instantiateChaincode() {
     set +x
   fi
   cat log.txt
-  verifyResult $res "Chaincode instantiation on peer${PEER}.${ORG} on channel '$CHANNEL_NAME' failed"
-  echo "===================== Chaincode is instantiated on peer${PEER}.${ORG} on channel '$CHANNEL_NAME' ===================== "
+  verifyResult $res "Chaincode instantiation on channel '$CHANNEL_NAME' failed"
+  echo "===================== Chaincode is instantiated on channel '$CHANNEL_NAME' ===================== "
   echo
 }
 
