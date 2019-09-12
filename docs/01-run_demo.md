@@ -23,7 +23,7 @@ For generating crypto materials and channel configuration transactions,starting 
 Removing previous keys and enrolling new one for admin, then registering user for org1:
 ```
 cd server/
-rm -rf wallet && node newadmin.js org1 && node newuser.js tester
+rm -rf wallet && node newadmin.js org1 && node newuser.js tester org1
 ```
 
 ## Flow 1
