@@ -29,9 +29,9 @@ I have modified [byfn](https://hyperledger-fabric.readthedocs.io/en/release-1.4/
 ## Demo
 This project contains a sample server/client application for testing different scenarios on HLCTB network. Code for sample application is available under `test_app` folder.
 
-For more information, refer [run_demo.md](docs/run_demo.md).
+For more information, refer [run_demo.md](docs/01-run_demo.md).
 
 ## Hosting HLCTB on cloud
 As the end product, this network would be running on cloud. And its service will be used for adding the necessary layer of security for certificate verification in SSL/TLS PKI communications.
 
-On how to deploy HLCTB on a server, refer [deploying_to_cloud.md](docs/deploying_to_cloud.md).
+On how to deploy HLCTB on a server, refer [deploying_to_cloud.md](docs/02-deploying_to_cloud.md).
