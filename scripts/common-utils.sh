@@ -165,7 +165,7 @@ function patchCert(){
         then
          continue
         fi
-        PEER_PREFIX=`echo $PEER | cut -f. -d1`
+        PEER_PREFIX=`echo $PEER | cut -f 1 -d "."`
         echo "########################################"
         echo $PEER
         echo "Path is $CERT_PATH"
