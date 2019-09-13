@@ -16,7 +16,7 @@ function getPEMCert(derBuffer){
 }
 
 
-let domain = 'domain.com';
+let domain = 'localhost';
 
 var socket = tls.connect(8080, domain, options, async () => {
   console.log('SSL PKI authenication status: ',
