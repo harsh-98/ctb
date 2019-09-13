@@ -90,6 +90,7 @@ installChaincode 0 browser
 # Instantiate chaincode on channel
 echo "Instantiating chaincode on channel..."
 instantiateChaincode
+exit 0
 
 # Invoke chaincode on peer0.org1 and peer0.org2
 echo "Sending invoke transaction on peer0.org1 peer0.org2..."
@@ -98,7 +99,6 @@ sleep 10
 chaincodeInvoke 0 org1 0 org2
 sleep 4
 chaincodeQuery 0 browser domain.com
-exit 0
 
 # adding a new certificate for domain.com while the current one is active
 newChaincodeInvoke 0 org1 0 org2
