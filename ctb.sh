@@ -83,7 +83,7 @@ function upgradeNetwork() {
     # create ledger-backup directory
     mkdir -p $LEDGERS_BACKUP
 
-    export IMAGE_TAG=$IMAGETAG
+    #export IMAGE_TAG=$IMAGETAG
     if [ "${IF_COUCHDB}" == "couchdb" ]; then
       if [ "$CONSENSUS_TYPE" == "kafka" ]; then
         COMPOSE_FILES="-f $COMPOSE_FILE -f $COMPOSE_FILE_KAFKA -f $COMPOSE_FILE_COUCH"
@@ -129,7 +129,7 @@ function upgradeNetwork() {
       fi
 
       # Start the peer again
-      docker-compose $COMPOSE_FILES up -d --no-deps $PEER
+      IMAGE_TAG=$IMAGETAG docker-compose $COMPOSE_FILES up -d --no-deps $PEER
     done
 
     docker exec cli scripts/upgrade_to_v14.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
@@ -163,7 +163,7 @@ function networkDown() {
     #Cleanup images
     removeUnwantedImages
     # remove orderer block and other channel configuration transactions and certs
-    rm -rf channel-artifacts/*.block channel-artifacts/*.tx ./org3-artifacts/crypto-config/ channel-artifacts/org3.json
+    rm -rf channel-artifacts/*.block channel-artifacts/*.tx
   fi
 }
 
@@ -279,7 +279,7 @@ function generateChannelArtifacts() {
     echo "configtxgen tool not found. exiting"
     exit 1
   fi
-
+  mkdir channel-artifacts
   echo "##########################################################"
   echo "#########  Generating Orderer Genesis block ##############"
   echo "##########################################################"
@@ -383,7 +383,6 @@ COMPOSE_FILE_RAFT2=docker-compose-etcdraft2.yaml
 # use golang as the default language for chaincode
 LANGUAGE=golang
 # default image tag
-IMAGETAG="latest"
 # default consensus type
 CONSENSUS_TYPE="solo"
 # Parse commandline args
@@ -430,7 +429,7 @@ if [ "${MODE}" == "up" ]; then
 elif [ "${MODE}" == "down" ]; then ## Clear the network
   networkDown
 elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
-  # generateCerts "./crypto-config.yaml"
+  generateCerts "./crypto-config.yaml"
   addIPtoConfigtx
   patchOrdererAndOrgs base/ext.cnf
   makeOrgYaml 1 org1 0.0.0.0:

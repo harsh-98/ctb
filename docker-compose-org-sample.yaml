@@ -10,7 +10,7 @@ volumes:
 
 services:
   ca.ORG_NAME.example.com:
-    image: hyperledger/fabric-ca
+    image: hyperledger/fabric-ca:$IMAGE_TAG
     environment:
       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
       - FABRIC_CA_SERVER_CA_NAME=ca.ORG_NAME.example.com

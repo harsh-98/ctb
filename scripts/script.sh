@@ -87,8 +87,8 @@ installChaincode 0 browser
 # installChaincode 1 browser
 
 
-# Instantiate chaincode on peer0.org2
-echo "Instantiating chaincode on peer0.org2..."
+# Instantiate chaincode on peer0.org1
+echo "Instantiating chaincode on peer0.org1..."
 instantiateChaincode 0 org1
 
 # Invoke chaincode on peer0.org1 and peer0.org2
