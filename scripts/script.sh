@@ -88,33 +88,36 @@ installChaincode 0 browser
 
 
 # Instantiate chaincode on peer0.org1
-echo "Instantiating chaincode on peer0.org1..."
+echo -e "\e[0;49;36m Instantiating chaincode on peer0.org1...\e[0m"
 instantiateChaincode 0 org1
+sleep 4
 
 # Invoke chaincode on peer0.org1 and peer0.org2
-echo "Sending invoke transaction on peer0.org1 peer0.org2..."
+echo -e "\e[0;49;36m Sending invoke transaction on peer0.org1 peer0.org2...\e[0m"
 # adding the first certificate for domain.com
-sleep 10
 chaincodeInvoke 0 org1 0 org2
 sleep 4
 chaincodeQuery 0 browser domain.com
 #exit 0
 
 # adding a new certificate for domain.com while the current one is active
+echo -e "\e[0;49;36m Sending renew certificate invoke transaction on peer0.org1 peer0.org2...\e[0m"
 newChaincodeInvoke 0 org1 0 org2
-sleep 2
+sleep 4
 chaincodeQuery 0 browser domain.com
 
 # revoking the current certificate
+echo -e " \e[0;49;36m ending revoke Certificate transaction on peer0.org1 peer0.org2...\e[0m"
 revokeCertificate 0 org1 0 org2
-sleep 2
+sleep 4
 chaincodeQuery 0 browser domain.com
 
 # getting certificate history
+echo -e "\e[0;49;36m Querying ledger for domain history \e[0m"
 queryHistory 0 browser domain.com
 
 echo
-echo "========= All GOOD, BYFN execution completed =========== "
+echo -e "\e[0;49;36m  ========= All GOOD, BYFN execution completed =========== \e[0m"
 echo
 
 echo

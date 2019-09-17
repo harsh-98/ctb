@@ -335,8 +335,8 @@ chaincodeInvoke() {
   # while 'peer chaincode' command can get the orderer endpoint from the
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
-  NEWCERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/domain.crt)\\n"
-  CACERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)
+  NEWCERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/cert-scripts/domain/domain.crt)\\n"
+  CACERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/cert-scripts/ca/ca.crt)
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
     peer chaincode invoke -o orderer.example.com:7050 -C $CHANNEL_NAME -n mycc $PEER_CONN_PARMS -c "{\"Args\":[\"addCertificate\",\"$NEWCERT\",\"$CACERT\",\"\"]}" >&log.txt
@@ -362,9 +362,9 @@ newChaincodeInvoke() {
   # while 'peer chaincode' command can get the orderer endpoint from the
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
-  NEWCERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/d2.crt)\\n"
-  CACERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)
-  ./scripts/sign scripts/certs/fixed-domain.key scripts/certs/d2.crt
+  NEWCERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/cert-scripts/renew-domain/renew-domain.crt)\\n"
+  CACERT=$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/cert-scripts/ca/ca.crt)
+  ./scripts/sign nopass scripts/cert-scripts/domain/unencrypted-domain.key scripts/cert-scripts/renew-domain/renew-domain.crt
   SIGNCERT=$(cat sig)
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
@@ -390,10 +390,10 @@ revokeCertificate() {
   # while 'peer chaincode' command can get the orderer endpoint from the
   # peer (if join was successful), let's supply it directly as we know
   # it using the "-o" option
-  CERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/d2.crt)\\n"
+  CERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/cert-scripts/renew-domain/renew-domain.crt)\\n"
   # CERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/d2.crt)\\n"
-  CACERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/certs/ca.crt)"
-  ./scripts/sign scripts/certs/unencrypted-ca.key scripts/certs/d2.crt
+  CACERT="$(sed ':a;N;$!ba;s/\n/\\n/g' scripts/cert-scripts/ca/ca.crt)"
+  ./scripts/sign nopass scripts/cert-scripts/ca/rsa-ca.key scripts/cert-scripts/renew-domain/renew-domain.crt
   SIGNCERT=$(cat sig)
   if [ -z "$CORE_PEER_TLS_ENABLED" -o "$CORE_PEER_TLS_ENABLED" = "false" ]; then
     set -x
