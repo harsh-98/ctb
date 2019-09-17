@@ -11,6 +11,15 @@ This demo involves communication between 4 parties:
 - domain server(includes `query Server`)
 - client (browser)
 
+## Provide your system IP
+Copy .env.sample to .env:
+```
+cp .env.sample .env
+```
+
+Edit .env and specify your system Ip as ORG_IP. This IP is included in the MSP identity certificates, so that if the name of peer isnot getting resolved then this IP can be used for communication between peers.
+
+
 ## Creating the network
 For generating crypto materials and channel configuration transactions,starting the members(docker images) of network and instantiating chaincode on channel.
 ```
@@ -23,7 +32,7 @@ For generating crypto materials and channel configuration transactions,starting 
 Removing previous keys and enrolling new one for admin, then registering user for org1:
 ```
 cd server/
-rm -rf wallet && node newadmin.js org1 && node newuser.js tester
+rm -rf wallet && node newadmin.js org1 && node newuser.js tester org1
 ```
 
 ## Flow 1

@@ -98,7 +98,7 @@ sleep 10
 chaincodeInvoke 0 org1 0 org2
 sleep 4
 chaincodeQuery 0 browser domain.com
-exit 0
+#exit 0
 
 # adding a new certificate for domain.com while the current one is active
 newChaincodeInvoke 0 org1 0 org2
