@@ -23,7 +23,7 @@ Edit .env and specify your system Ip as ORG_IP. This IP is included in the MSP i
 ## Creating the network
 For generating crypto materials and channel configuration transactions,starting the members(docker images) of network and instantiating chaincode on channel.
 ```
-./ctb.sh down <<< "Y" &&  ./ctb.sh generate <<< "Y" && ./ctb.sh up  <<< "Y"  && ./ctb.sh test <<< "Y"
+./ctb.sh down <<< "Y" &&  ./ctb.sh generate <<< "Y" && ./ctb.sh up  <<< "Y"  && ./ctb.sh channel <<< "Y"
 ```
 
 
