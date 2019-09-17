@@ -14,7 +14,12 @@ This is based on paper [Certificate Transparency Using Blockchain](https://eprin
 ./ctb.sh up
 ```
 
-Note: Single command `./ctb.sh generate <<< "Y" && ./ctb.sh up  <<< "Y"`
+## Create channel and join peers
+```
+./ctb.sh channel
+```
+
+Note: Single command `./ctb.sh generate <<< "Y" && ./ctb.sh up  <<< "Y" && ./ctb.sh channel <<< "Y"`
 
 ## Structure
 Certificates are available in `scripts/certs`. There are:

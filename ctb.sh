@@ -58,9 +58,19 @@ function networkUp() {
   fi
 }
 
+function createChannel(){
+  # now run the end to end script
+  docker exec cli scripts/channel.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
+  if [ $? -ne 0 ]; then
+    echo "ERROR !!!! Test failed"
+    exit 1
+  fi
+}
+
+
 function testcases(){
   # now run the end to end script
-  docker exec cli scripts/script.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
+  docker exec cli scripts/test.sh $CHANNEL_NAME $CLI_DELAY $LANGUAGE $CLI_TIMEOUT $VERBOSE
   if [ $? -ne 0 ]; then
     echo "ERROR !!!! Test failed"
     exit 1
@@ -439,6 +449,8 @@ elif [ "${MODE}" == "generate" ]; then ## Generate Artifacts
   generateChannelArtifacts
 elif [ "${MODE}" == "test" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
   testcases
+elif [ "${MODE}" == "channel" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
+  createChannel
 elif [ "${MODE}" == "submit" ]; then
   submitOrg
 elif [ "${MODE}" == "make" ]; then ## Upgrade the network from version 1.2.x to 1.3.x
