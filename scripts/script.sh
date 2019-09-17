@@ -87,8 +87,8 @@ installChaincode 0 browser
 # installChaincode 1 browser
 
 
-# Instantiate chaincode on peer0.org2
-echo "Instantiating chaincode on peer0.org2..."
+# Instantiate chaincode on peer0.org1
+echo "Instantiating chaincode on peer0.org1..."
 instantiateChaincode 0 org1
 
 # Invoke chaincode on peer0.org1 and peer0.org2
@@ -98,7 +98,7 @@ sleep 10
 chaincodeInvoke 0 org1 0 org2
 sleep 4
 chaincodeQuery 0 browser domain.com
-exit 0
+#exit 0
 
 # adding a new certificate for domain.com while the current one is active
 newChaincodeInvoke 0 org1 0 org2

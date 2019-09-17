@@ -23,6 +23,6 @@ report-*.html
 *cert.pem
 **/configtx.yaml
 **/update_in_envelope.pb
-
+.env
 channel_config_server/**/
 **/channel-artifacts/*
